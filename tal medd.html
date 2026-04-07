@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simulasi ATM BNI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f3f3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .atm-container {
+      background-color: white;
+      border: 2px solid #ff6600;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #ff6600;
+    }
+    input, button, select {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .hidden {
+      display: none;
+    }
+    .menu {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="atm-container">
+    <h2>ATM BNI</h2>
+
+    <!-- Login Section -->
+    <div id="loginSection">
+      <input type="text" id="rekening" placeholder="Nomor Rekening" />
+      <input type="password" id="pin" placeholder="PIN" />
+      <button onclick="login()">Login</button>
+      <p id="loginMessage" style="color: red;"></p>
+    </div>
+
+    <!-- Menu Section -->
+    <div id="menuSection" class="hidden">
+      <p><strong>Saldo Anda:</strong> Rp <span id="saldo">0</span></p>
+      <select id="menu">
+        <option value="">-- Pilih Transaksi --</option>
+        <option value="cek">Cek Saldo</option>
+        <option value="setor">Setor Tunai</option>
+        <option value="tarik">Tarik Tunai</option>
+        <option value="keluar">Keluar</option>
+      </select>
+      <input type="number" id="jumlah" placeholder="Jumlah (Rp)" class="hidden" />
+      <button onclick="prosesTransaksi()">Proses</button>
+      <p id="pesanTransaksi"></p>
+    </div>
+  </div>
+
+  <script>
+    const akun = {
+      "1234567890": {
+        pin: "1234",
+        saldo: 5000000
+      }
+    };
+
+    let currentUser = null;
+
+    function login() {
+      const norek = document.getElementById("rekening").value;
+      const pin = document.getElementById("pin").value;
+      const loginMessage = document.getElementById("loginMessage");
+
+      if (akun[norek] && akun[norek].pin === pin) {
+        currentUser = norek;
+        document.getElementById("loginSection").classList.add("hidden");
+        document.getElementById("menuSection").classList.remove("hidden");
+        document.getElementById("saldo").textContent = akun[currentUser].saldo.toLocaleString();
+        loginMessage.textContent = "";
+      } else {
+        loginMessage.textContent = "Rekening atau PIN salah!";
+      }
+    }
+
+    function prosesTransaksi() {
+      const menu = document.getElementById("menu").value;
+      const jumlahInput = document.getElementById("jumlah");
+      const pesan = document.getElementById("pesanTransaksi");
+
+      pesan.textContent = "";
+
+      if (menu === "cek") {
+        document.getElementById("saldo").textContent = akun[currentUser].saldo.toLocaleString();
+        jumlahInput.classList.add("hidden");
+      } else if (menu === "setor") {
+        jumlahInput.classList.remove("hidden");
+        const jumlah = parseInt(jumlahInput.value);
+        if (!isNaN(jumlah) && jumlah > 0) {
+          akun[currentUser].saldo += jumlah;
+          pesan.textContent = Setor tunai berhasil!;
+          document.getElementById("saldo").textContent = akun[currentUser].saldo.toLocaleString();
+        } else {
+          pesan.textContent = "Jumlah tidak valid!";
+        }
+      } else if (menu === "tarik") {
+        jumlahInput.classList.remove("hidden");
+        const jumlah = parseInt(jumlahInput.value);
+        if (!isNaN(jumlah) && jumlah > 0 && jumlah <= akun[currentUser].saldo) {
+          akun[currentUser].saldo -= jumlah;
+          pesan.textContent = Tarik tunai berhasil!;
+          document.getElementById("saldo").textContent = akun[currentUser].saldo.toLocaleString();
+        } else {
+          pesan.textContent = "Saldo tidak cukup atau jumlah tidak valid!";
+        }
+      } else if (menu === "keluar") {
+        location.reload(); // refresh halaman
+      } else {
+        pesan.textContent = "Silakan pilih transaksi.";
+      }
+    }
+  </script>
+</body>
+</html>

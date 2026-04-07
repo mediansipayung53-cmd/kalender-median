@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KALENDER TAHUN 2026</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #00cec9;
+            --weekend: #ff7675;
+            --text-main: #2d3436;
+            --white: #ffffff;
+            /* Glass effect yang lebih tebal agar kontras dengan foto */
+            --glass: rgba(255, 255, 255, 0.92); 
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            color: var(--text-main);
+
+            /* Setup Background Image */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            
+            /* Transisi halus saat ganti gambar */
+            transition: background-image 0.6s ease-in-out;
+        }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 2em;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        /* Navigasi Responsif */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .month-year {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+            order: 2;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            background: #5649c0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Grid Kalender */
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .day {
+            padding: 15px 5px;
+            text-align: center;
+            border-radius: 10px;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1;
+        }
+
+        .day-header {
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            border: none;
+            aspect-ratio: auto;
+            height: 40px;
+            cursor: default;
+        }
+
+        .day:hover:not(.empty):not(.day-header) {
+            transform: scale(1.05);
+            background: var(--secondary);
+            color: white;
+            z-index: 2;
+        }
+
+        .day.selected {
+            background: var(--primary);
+            color: white;
+            border: 2px solid var(--accent);
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .day.weekend {
+            color: #d63031;
+            background: rgba(255, 118, 117, 0.1);
+        }
+
+        .day.holiday {
+            background: #ff7675;
+            color: white;
+            position: relative;
+        }
+        
+        .day.holiday::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .day.empty {
+            background: transparent;
+            cursor: default;
+            border: none;
+        }
+
+        /* Kartu Detail */
+        .detail-card {
+            background: #f1f2f6;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .detail-card.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .detail-date {
+            font-size: 0.9em;
+            color: #636e72;
+            margin-bottom: 5px;
+        }
+
+        .detail-info {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        /* RESPONSIF MOBILE */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            .container {
+                padding: 15px;
+            }
+            .nav {
+                justify-content: center;
+            }
+            .month-year {
+                width: 100%;
+                order: 1;
+                margin-bottom: 10px;
+            }
+            #prev, #next {
+                order: 2;
+                padding: 8px 15px;
+                font-size: 0.9em;
+                flex-grow: 1;
+            }
+            .calendar {
+                gap: 4px;
+            }
+            .day {
+                font-size: 0.8em;
+                padding: 5px;
+                border-radius: 6px;
+            }
+            .day-header {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>KALENDER PENDIDIKAN 2026</h1>
+        <div class="nav">
+            <button id="prev">&#10094; Sebelumnya</button>
+            <div class="month-year" id="month-year">Januari 2026</div>
+            <button id="next">Selanjutnya &#10095;</button>
+        </div>
+        
+        <div class="calendar" id="calendar"></div>
+        
+        <div class="detail-card" id="detail-card">
+            <div class="detail-date" id="detail-date"></div>
+            <div class="detail-info" id="detail-info"></div>
+        </div>
+    </div>
+
+    <script>
+        const months = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        const daysOfWeek = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        
+        // --- DATA GAMBAR BACKGROUND PENDIDIKAN ---
+        // Menggunakan URL gambar dari Unsplash dengan tema pendidikan
+        const backgroundImages = [
+            'https://images.unsplash.com/photo-1507842217121-9e96e471591b?auto=format&fit=crop&w=1600&q=80', // Jan: Perpustakaan
+            'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=1600&q=80', // Feb: Pensil & Catatan
+            'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80', // Mar: Papan Tulis / Math
+            'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1600&q=80', // Apr: Kelas Modern
+            'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1600&q=80', // Mei: Buku Terbuka
+            'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1600&q=80', // Jun: Topi Wisuda
+            'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1600&q=80', // Jul: Sekolah/Belajar
+            'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1600&q=80', // Agu: Engineering/Sains
+            'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1600&q=80', // Sep: Globe/Geografi
+            'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1600&q=80', // Okt: Laptop/E-learning
+            'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1600&q=80', // Nov: Menulis
+            'https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?auto=format&fit=crop&w=1600&q=80'  // Des: Tumpukan Buku
+        ];
+
+        const holidays = {
+            '2026-01-01': 'Tahun Baru 2026',
+            '2026-02-17': 'Tahun Baru Imlek 2577',
+            '2026-03-11': 'Hari Raya Nyepi',
+            '2026-03-20': 'Perkiraan Libur Awal Puasa',
+            '2026-04-03': 'Wafat Isa Al Masih',
+            '2026-04-17': 'Perkiraan Cuti Bersama Lebaran',
+            '2026-04-20': 'Hari Raya Idul Fitri 1447H',
+            '2026-04-21': 'Hari Raya Idul Fitri 1447H (Hari Kedua)',
+            '2026-05-01': 'Hari Buruh Internasional',
+            '2026-05-14': 'Kenaikan Isa Al Masih',
+            '2026-05-31': 'Hari Raya Waisak',
+            '2026-06-01': 'Hari Lahir Pancasila',
+            '2026-06-27': 'Hari Raya Idul Adha 1447H',
+            '2026-07-17': 'Tahun Baru Islam 1448H',
+            '2026-08-17': 'Hari Kemerdekaan RI ke-81',
+            '2026-09-28': 'Maulid Nabi Muhammad SAW',
+            '2026-12-25': 'Hari Raya Natal'
+        };
+
+        let currentMonth = 0;
+        let currentYear = 2026;
+
+        function updateBackground() {
+            // Mengambil gambar berdasarkan index bulan (0-11)
+            // Menambahkan linear-gradient hitam transparan agar teks tetap terbaca
+            const imageUrl = backgroundImages[currentMonth % backgroundImages.length];
+            document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${imageUrl}')`;
+        }
+
+        function renderCalendar() {
+            // Update background setiap kali render
+            updateBackground();
+
+            const calendar = document.getElementById('calendar');
+            const monthYear = document.getElementById('month-year');
+            const detailCard = document.getElementById('detail-card');
+            
+            calendar.innerHTML = '';
+            detailCard.classList.remove('active');
+            monthYear.textContent = `${months[currentMonth]} ${currentYear}`;
+
+            daysOfWeek.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day day-header';
+                dayHeader.textContent = day;
+                calendar.appendChild(dayHeader);
+            });
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'day empty';
+                calendar.appendChild(emptyDay);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day';
+                dayElement.textContent = day;
+
+                const monthStr = String(currentMonth + 1).padStart(2, '0');
+                const dayStr = String(day).padStart(2, '0');
+                const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
+                const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
+
+                if (dayOfWeek === 0) {
+                    dayElement.classList.add('weekend');
+                }
+
+                if (holidays[dateStr]) {
+                    dayElement.classList.add('holiday');
+                    dayElement.title = holidays[dateStr];
+                }
+
+                dayElement.addEventListener('click', function() {
+                    document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
+                    this.classList.add('selected');
+                    showDetail(dateStr, holidays[dateStr] || 'Hari Sekolah Biasa');
+                });
+
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        function showDetail(date, info) {
+            const detailCard = document.getElementById('detail-card');
+            const dateDisplay = document.getElementById('detail-date');
+            const infoDisplay = document.getElementById('detail-info');
+            
+            const dateObj = new Date(date);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const prettyDate = dateObj.toLocaleDateString('id-ID', options);
+
+            dateDisplay.textContent = prettyDate;
+            infoDisplay.textContent = info;
+            
+            detailCard.classList.add('active');
+        }
+
+        document.getElementById('prev').addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        });
+
+        document.getElementById('next').addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        });
+
+        renderCalendar();
+    </script>
+</body>
+</html>

@@ -1,0 +1,497 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D SNIPER KOTA · HD + PENDUDUK</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        #info {
+            position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8);
+            color: white; padding: 12px 28px; border-radius: 50px;
+            backdrop-filter: blur(5px); border: 1px solid #f90; z-index: 10;
+            display: flex; gap: 30px; font-weight: 600; letter-spacing: 1px;
+        }
+        #score { color: #ffaa33; font-size: 28px; margin-left: 8px; text-shadow: 0 0 10px orange; }
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 40px; height: 40px; border: 2px solid rgba(255,255,255,0.9);
+            border-radius: 50%; box-shadow: 0 0 20px red; pointer-events: none; z-index: 20;
+        }
+        #crosshair::before, #crosshair::after {
+            content: ''; position: absolute; background: white; box-shadow: 0 0 8px red;
+        }
+        #crosshair::before { width: 20px; height: 2px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+        #crosshair::after { width: 2px; height: 20px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+        #instructions {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(10,20,30,0.9); color: #ccc; padding: 12px 30px;
+            border-radius: 60px; font-size: 18px; border: 1px solid #f90; z-index: 15;
+            backdrop-filter: blur(4px); white-space: nowrap;
+        }
+        kbd { background: #2a3f55; color: white; padding: 4px 12px; border-radius: 30px; margin: 0 4px; border: 1px solid #7aa; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <span>🎯 SKOR <span id="score">0</span></span>
+        <span>⚡ SNIPER <span style="color:#ffb347;">∞</span></span>
+    </div>
+    <div id="crosshair"></div>
+    <div id="instructions">
+        <kbd>WASD</kbd> gerak · <kbd>MOUSE</kbd> lihat · <kbd>KLIK KIRI</kbd> tembak · klik area game untuk mulai
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js'; // optional untuk label, tapi tidak dipakai
+
+        // --- Inisialisasi HD ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a1425); // biru malam
+        scene.fog = new THREE.Fog(0x0a1425, 40, 150);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500);
+        camera.position.set(25, 5, 35);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // HD maksimal 2x untuk performa
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // --- Pencahayaan dramatis ---
+        const ambient = new THREE.AmbientLight(0x40406b);
+        scene.add(ambient);
+
+        const moonLight = new THREE.DirectionalLight(0xcceeff, 1.5);
+        moonLight.position.set(20, 40, 20);
+        moonLight.castShadow = true;
+        moonLight.receiveShadow = true;
+        moonLight.shadow.mapSize.width = 2048;
+        moonLight.shadow.mapSize.height = 2048;
+        moonLight.shadow.camera.left = -60;
+        moonLight.shadow.camera.right = 60;
+        moonLight.shadow.camera.top = 60;
+        moonLight.shadow.camera.bottom = -60;
+        moonLight.shadow.camera.near = 1;
+        moonLight.shadow.camera.far = 100;
+        scene.add(moonLight);
+
+        // lampu jalan / titik hangat
+        const pointLight1 = new THREE.PointLight(0xffaa55, 1, 30);
+        pointLight1.position.set(0, 5, 0);
+        scene.add(pointLight1);
+
+        // --- Tanah HD dengan tekstur jalan & trotoar ---
+        // Buat kanvas untuk tekstur jalan (aspal + marka)
+        const roadCanvas = document.createElement('canvas');
+        roadCanvas.width = 512;
+        roadCanvas.height = 512;
+        const rCtx = roadCanvas.getContext('2d');
+        rCtx.fillStyle = '#2a3a4a';
+        rCtx.fillRect(0, 0, 512, 512);
+        // marka jalan putus-putus
+        rCtx.strokeStyle = '#f9f9f9';
+        rCtx.lineWidth = 20;
+        rCtx.setLineDash([50, 60]);
+        rCtx.beginPath();
+        rCtx.moveTo(256, 0);
+        rCtx.lineTo(256, 512);
+        rCtx.stroke();
+        // garis pinggir
+        rCtx.setLineDash([]);
+        rCtx.strokeStyle = '#aaa';
+        rCtx.lineWidth = 15;
+        rCtx.strokeRect(30, 30, 452, 452);
+
+        const roadTexture = new THREE.CanvasTexture(roadCanvas);
+        roadTexture.wrapS = THREE.RepeatWrapping;
+        roadTexture.wrapT = THREE.RepeatWrapping;
+        roadTexture.repeat.set(8, 8);
+
+        const groundMat = new THREE.MeshStandardMaterial({ map: roadTexture, roughness: 0.8, metalness: 0.2 });
+        const ground = new THREE.Mesh(new THREE.CircleGeometry(200, 64), groundMat);
+        ground.rotation.x = -Math.PI/2;
+        ground.position.y = -0.05;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // grid pembantu (untuk referensi, bisa dihapus)
+        const grid = new THREE.GridHelper(200, 40, 0xffaa33, 0x335588);
+        grid.position.y = 0;
+        scene.add(grid);
+
+        // --- GEDUNG-GEDUNG dengan tekstur jendela lebih hidup ---
+        function createBuilding(x, z, w, d, h, baseColor) {
+            const geometry = new THREE.BoxGeometry(w, h, d);
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = baseColor;
+            ctx.fillRect(0, 0, 256, 256);
+            // jendela
+            ctx.fillStyle = '#ffdb8a';
+            for (let i=0; i<6; i++) {
+                for (let j=0; j<8; j++) {
+                    if (Math.random() > 0.2) { // beberapa lampu mati
+                        ctx.fillStyle = '#ffdb8a';
+                    } else {
+                        ctx.fillStyle = '#332211';
+                    }
+                    ctx.fillRect(30 + i*35, 25 + j*28, 18, 18);
+                }
+            }
+            // garis vertikal
+            ctx.strokeStyle = '#9ab';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(0,0,256,256);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.MeshStandardMaterial({ map: texture, emissive: 0x221100 });
+            const building = new THREE.Mesh(geometry, material);
+            building.position.set(x, h/2, z);
+            building.castShadow = true;
+            building.receiveShadow = true;
+            return building;
+        }
+
+        const buildingPositions = [
+            [-30, -30, 10, 10, 18, '#3f5c8a'],
+            [-10, -35, 12, 12, 24, '#2c4e72'],
+            [15, -25, 9, 9, 15, '#4a6b97'],
+            [35, -15, 8, 8, 20, '#1f3f60'],
+            [-35, 0, 11, 11, 22, '#2e557a'],
+            [-15, 20, 10, 10, 16, '#3a6190'],
+            [5, 30, 13, 13, 28, '#1e3d62'],
+            [25, 15, 9, 9, 14, '#5471a3'],
+            [40, 25, 8, 8, 12, '#2b4f7b'],
+            [-40, 30, 10, 10, 20, '#1a3455'],
+        ];
+        const buildings = [];
+        buildingPositions.forEach(([x,z,w,d,h,col]) => {
+            const b = createBuilding(x, z, w, d, h, col);
+            scene.add(b);
+            buildings.push(b);
+        });
+
+        // --- JALAN RAYA dan trotoar (mobil & pejalan akan berjalan di atasnya) ---
+        // Kita tambahkan beberapa plane untuk trotoar (opsional)
+
+        // --- KENDARAAN (mobil & motor) ---
+        function createCar(color, pos, isMotor = false) {
+            const group = new THREE.Group();
+            const bodyGeo = isMotor ? new THREE.BoxGeometry(1.2, 1.0, 2.2) : new THREE.BoxGeometry(2.0, 1.0, 4.0);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: color, emissive: 0x221100 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.5;
+            body.castShadow = true;
+            body.receiveShadow = true;
+            group.add(body);
+            
+            // roda
+            const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.5, 16);
+            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const positions = isMotor ? [[-0.5,0.3,0.7], [0.5,0.3,0.7], [-0.5,0.3,-0.7], [0.5,0.3,-0.7]] 
+                                      : [[-1.0,0.3,1.2], [1.0,0.3,1.2], [-1.0,0.3,-1.2], [1.0,0.3,-1.2]];
+            positions.forEach(posW => {
+                const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+                wheel.rotation.z = Math.PI/2;
+                wheel.position.set(posW[0], posW[1], posW[2]);
+                wheel.castShadow = true;
+                wheel.receiveShadow = true;
+                group.add(wheel);
+            });
+            
+            if (isMotor) {
+                // stang
+                const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,1.0), new THREE.MeshStandardMaterial({color:0xaaaaaa}));
+                bar.rotation.x = Math.PI/2;
+                bar.position.set(0, 0.9, 0.5);
+                group.add(bar);
+            }
+            
+            group.position.copy(pos);
+            return group;
+        }
+
+        const vehicles = [];
+        const vehicleSpeed = 0.1;
+        // beberapa mobil
+        const carColors = [0xff3333, 0x33ff33, 0x3333ff, 0xffcc00, 0xcc00cc];
+        for (let i=0; i<6; i++) {
+            const x = (i-3)*12 + 5;
+            const z = -30 + Math.random()*10;
+            const car = createCar(carColors[i%carColors.length], new THREE.Vector3(x, 0.2, z), false);
+            scene.add(car);
+            vehicles.push({ obj: car, speed: 0.1 + Math.random()*0.1, dir: 1, axis: 'x', range: [-40,40] });
+        }
+        // motor
+        for (let i=0; i<4; i++) {
+            const x = (i-2)*15 - 10;
+            const z = 20 + Math.random()*8;
+            const mot = createCar(0x888888, new THREE.Vector3(x, 0.2, z), true);
+            scene.add(mot);
+            vehicles.push({ obj: mot, speed: 0.15 + Math.random()*0.1, dir: 1, axis: 'x', range: [-45,45] });
+        }
+
+        // --- PEJALAN KAKI (manusia sederhana) ---
+        function createHuman(x, z, colorVariant) {
+            const group = new THREE.Group();
+            // badan
+            const torsoGeo = new THREE.BoxGeometry(0.8, 1.5, 0.4);
+            const torsoMat = new THREE.MeshStandardMaterial({ color: colorVariant });
+            const torso = new THREE.Mesh(torsoGeo, torsoMat);
+            torso.position.y = 0.75;
+            torso.castShadow = true;
+            torso.receiveShadow = true;
+            group.add(torso);
+            
+            // kepala
+            const headGeo = new THREE.SphereGeometry(0.3);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xffddbb });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.6;
+            head.castShadow = true;
+            head.receiveShadow = true;
+            group.add(head);
+            
+            // lengan (silinder)
+            const armGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.9);
+            const armMat = new THREE.MeshStandardMaterial({ color: 0xaa8866 });
+            const leftArm = new THREE.Mesh(armGeo, armMat);
+            leftArm.position.set(-0.5, 1.2, 0);
+            leftArm.rotation.z = 0.2;
+            leftArm.castShadow = true;
+            group.add(leftArm);
+            
+            const rightArm = new THREE.Mesh(armGeo, armMat);
+            rightArm.position.set(0.5, 1.2, 0);
+            rightArm.rotation.z = -0.2;
+            rightArm.castShadow = true;
+            group.add(rightArm);
+            
+            // kaki
+            const legGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.9);
+            const legMat = new THREE.MeshStandardMaterial({ color: 0x334466 });
+            const leftLeg = new THREE.Mesh(legGeo, legMat);
+            leftLeg.position.set(-0.25, 0.3, 0);
+            leftLeg.castShadow = true;
+            group.add(leftLeg);
+            
+            const rightLeg = new THREE.Mesh(legGeo, legMat);
+            rightLeg.position.set(0.25, 0.3, 0);
+            rightLeg.castShadow = true;
+            group.add(rightLeg);
+            
+            group.position.set(x, 0.1, z);
+            return group;
+        }
+
+        const pedestrians = [];
+        for (let i=0; i<20; i++) {
+            const angle = Math.random() * Math.PI*2;
+            const radius = 30 + Math.random()*30;
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            const human = createHuman(x, z, Math.random() * 0xffffff);
+            scene.add(human);
+            pedestrians.push({
+                obj: human,
+                speed: 0.03 + Math.random()*0.04,
+                dir: new THREE.Vector3(Math.random()-0.5, 0, Math.random()-0.5).normalize()
+            });
+        }
+
+        // --- MUSUH (MANUSIA) di atap / jendela ---
+        function createEnemy(posX, posY, posZ) {
+            const group = new THREE.Group();
+            // warna gelap / teroris
+            const skinColor = 0xcc9966;
+            const clothesColor = 0x332211;
+            
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.4, 0.5), new THREE.MeshStandardMaterial({ color: clothesColor, emissive: 0x110000 }));
+            torso.position.y = 0.7;
+            torso.castShadow = true;
+            group.add(torso);
+            
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.35), new THREE.MeshStandardMaterial({ color: skinColor, emissive: 0x221100 }));
+            head.position.y = 1.5;
+            head.castShadow = true;
+            group.add(head);
+            
+            // sorban / topi
+            const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.2), new THREE.MeshStandardMaterial({ color: 0x442211 }));
+            hat.position.y = 1.75;
+            group.add(hat);
+            
+            // senapan (kayak sniper)
+            const rifle = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.2, 0.2), new THREE.MeshStandardMaterial({ color: 0x444444 }));
+            rifle.position.set(0.5, 1.2, 0.2);
+            rifle.rotation.z = 0.1;
+            group.add(rifle);
+            
+            group.position.set(posX, posY, posZ);
+            return group;
+        }
+
+        // posisi musuh di atap / tinggi
+        const enemyPositions = [
+            [-30, 12, -30], [-10, 18, -35], [15, 12, -25], [35, 15, -15],
+            [-35, 16, 0], [-15, 13, 20], [5, 22, 30], [25, 11, 15], [40, 9, 25],
+            [-40, 15, 30]
+        ];
+        const enemies = [];
+        enemyPositions.forEach(([x,y,z]) => {
+            const enemy = createEnemy(x, y, z);
+            scene.add(enemy);
+            enemies.push(enemy);
+        });
+
+        // --- Kontrol Pemain (First Person) ---
+        const controls = new PointerLockControls(camera, document.body);
+        renderer.domElement.addEventListener('click', () => controls.lock());
+
+        const keyState = { w: false, a: false, s: false, d: false };
+        document.addEventListener('keydown', (e) => {
+            switch(e.code) {
+                case 'KeyW': keyState.w = true; break;
+                case 'KeyA': keyState.a = true; break;
+                case 'KeyS': keyState.s = true; break;
+                case 'KeyD': keyState.d = true; break;
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            switch(e.code) {
+                case 'KeyW': keyState.w = false; break;
+                case 'KeyA': keyState.a = false; break;
+                case 'KeyS': keyState.s = false; break;
+                case 'KeyD': keyState.d = false; break;
+            }
+        });
+
+        const moveSpeed = 12;
+        const velocity = new THREE.Vector3();
+
+        // --- Skor dan Tembakan ---
+        let score = 0;
+        const scoreSpan = document.getElementById('score');
+        let shootCooldown = 0;
+        const COOLDOWN_MAX = 10;
+
+        const raycaster = new THREE.Raycaster();
+        const shootDir = new THREE.Vector3();
+
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return;
+            if (!controls.isLocked) return;
+            if (shootCooldown > 0) return;
+
+            raycaster.set(camera.position, camera.getWorldDirection(shootDir));
+            const intersects = raycaster.intersectObjects(enemies, true); // periksa seluruh grup
+
+            if (intersects.length > 0) {
+                // cari grup musuh (parent dari mesh yang terkena)
+                let hitEnemy = intersects[0].object;
+                while (hitEnemy.parent && !enemies.includes(hitEnemy)) {
+                    hitEnemy = hitEnemy.parent;
+                }
+                if (enemies.includes(hitEnemy)) {
+                    scene.remove(hitEnemy);
+                    const idx = enemies.indexOf(hitEnemy);
+                    if (idx !== -1) enemies.splice(idx, 1);
+                    score += 100;
+                    scoreSpan.innerText = score;
+
+                    // respawn musuh baru setelah 1 detik
+                    setTimeout(() => {
+                        const pos = enemyPositions[Math.floor(Math.random() * enemyPositions.length)];
+                        const newEnemy = createEnemy(pos[0] + (Math.random()-0.5)*2, pos[1], pos[2] + (Math.random()-0.5)*2);
+                        scene.add(newEnemy);
+                        enemies.push(newEnemy);
+                    }, 800);
+                }
+            }
+            shootCooldown = COOLDOWN_MAX;
+        });
+
+        // --- Animasi dan loop ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            const delta = Math.min(clock.getDelta(), 0.1);
+
+            // Gerak pemain
+            if (controls.isLocked) {
+                velocity.x *= 0.9;
+                velocity.z *= 0.9;
+                const dir = new THREE.Vector3();
+                dir.z = Number(keyState.w) - Number(keyState.s);
+                dir.x = Number(keyState.d) - Number(keyState.a);
+                dir.normalize();
+                velocity.x += dir.x * moveSpeed * delta;
+                velocity.z += dir.z * moveSpeed * delta;
+                controls.moveRight(velocity.x * delta);
+                controls.moveForward(velocity.z * delta);
+
+                // batas area
+                if (camera.position.x > 45) camera.position.x = 45;
+                if (camera.position.x < -45) camera.position.x = -45;
+                if (camera.position.z > 45) camera.position.z = 45;
+                if (camera.position.z < -45) camera.position.z = -45;
+            }
+
+            // Gerak kendaraan
+            vehicles.forEach(v => {
+                v.obj.position.x += v.speed * v.dir;
+                if (v.obj.position.x > v.range[1]) v.dir = -1;
+                if (v.obj.position.x < v.range[0]) v.dir = 1;
+            });
+
+            // Gerak pejalan kaki (acak)
+            pedestrians.forEach(p => {
+                p.obj.position.x += p.dir.x * p.speed;
+                p.obj.position.z += p.dir.z * p.speed;
+                // jika keluar batas, balik arah
+                if (Math.abs(p.obj.position.x) > 45 || Math.abs(p.obj.position.z) > 45) {
+                    p.dir.x *= -1;
+                    p.dir.z *= -1;
+                }
+                // animasi sederhana: ayunan tangan? skip
+            });
+
+            // Animasi musuh (sedikit bergerak)
+            enemies.forEach(e => {
+                e.rotation.y += 0.005;
+            });
+
+            // Cooldown tembak
+            if (shootCooldown > 0) shootCooldown--;
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

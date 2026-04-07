@@ -1,0 +1,2801 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNBP 2025 - Seleksi Nasional Berdasarkan Prestasi</title>
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --danger: #fc8181;
+            --dark: #1a202c;
+            --light: #f7fafc;
+            --gray: #718096;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--primary), var(--secondary));
+            border-radius: 10px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .navbar.scrolled .logo {
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: color 0.3s;
+        }
+
+        .navbar.scrolled .nav-links a {
+            color: var(--dark);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-btn {
+            padding: 0.7rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0px);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .navbar.scrolled .hamburger span {
+            background: var(--dark);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='[w3.org](http://www.w3.org/2000/svg)'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) { width: 80px; height: 80px; top: 10%; left: 10%; animation-delay: 0s; }
+        .shape:nth-child(2) { width: 120px; height: 120px; top: 20%; right: 15%; animation-delay: 2s; }
+        .shape:nth-child(3) { width: 60px; height: 60px; bottom: 30%; left: 20%; animation-delay: 4s; }
+        .shape:nth-child(4) { width: 100px; height: 100px; bottom: 20%; right: 10%; animation-delay: 6s; }
+        .shape:nth-child(5) { width: 50px; height: 50px; top: 50%; left: 50%; animation-delay: 8s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 5%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-text h1 span {
+            background: linear-gradient(90deg, #ffecd2, #fcb69f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        .hero-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: cardFloat 6s infinite ease-in-out;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-card img {
+            width: 300px;
+            height: auto;
+        }
+
+        .hero-card-content {
+            text-align: center;
+            color: white;
+        }
+
+        .hero-card-content i {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-card-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-card-content p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 4rem 5%;
+            background: white;
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            transform: translateY(-5px);
+        }
+
+        .stat-item:hover * {
+            color: white !important;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover .stat-icon {
+            background: white;
+        }
+
+        .stat-icon i {
+            font-size: 1.5rem;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover .stat-icon i {
+            color: var(--primary);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* About Section */
+        .about {
+            padding: 6rem 5%;
+            background: var(--light);
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .section-header h2 span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-header p {
+            color: var(--gray);
+            line-height: 1.8;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .about-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .about-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .about-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2);
+        }
+
+        .about-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .about-card:hover .about-icon {
+            transform: rotateY(180deg);
+        }
+
+        .about-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .about-card h3 {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .about-card p {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+
+        /* Timeline Section */
+        .timeline-section {
+            padding: 6rem 5%;
+            background: linear-gradient(135deg, var(--dark) 0%, #2d3748 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='[w3.org](http://www.w3.org/2000/svg)'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        .timeline-section .section-header h2,
+        .timeline-section .section-header p {
+            color: white;
+        }
+
+        .timeline-section .section-header h2 span {
+            background: linear-gradient(135deg, var(--accent), #f5af19);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            display: flex;
+            justify-content: flex-end;
+            padding-right: 50%;
+            position: relative;
+            margin-bottom: 3rem;
+        }
+
+        .timeline-item:nth-child(even) {
+            justify-content: flex-start;
+            padding-right: 0;
+            padding-left: 50%;
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .timeline-content:hover {
+            transform: scale(1.05);
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-right: 30px;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: 30px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
+            top: 30px;
+            border: 4px solid white;
+            box-shadow: 0 0 0 4px var(--primary);
+        }
+
+        .timeline-item:nth-child(odd) .timeline-dot {
+            right: -10px;
+            left: auto;
+        }
+
+        .timeline-item:nth-child(even) .timeline-dot {
+            left: -10px;
+        }
+
+        .timeline-date {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-content h3 {
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .timeline-content p {
+            color: var(--gray);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Requirements Section */
+        .requirements {
+            padding: 6rem 5%;
+            background: white;
+        }
+
+        .req-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .req-image {
+            position: relative;
+        }
+
+        .req-image-box {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 30px;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .req-image-box::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -50px;
+            right: -50px;
+        }
+
+        .req-image-box::after {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            bottom: -30px;
+            left: -30px;
+        }
+
+        .req-image-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+        }
+
+        .req-image-content i {
+            font-size: 6rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .req-image-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .req-image-content p {
+            opacity: 0.9;
+        }
+
+        .req-list {
+            list-style: none;
+        }
+
+        .registration {
+            padding: 6rem 5%;
+            background: #f7fafc;
+        }
+
+        .registration .section-header h2,
+        .registration .section-header p {
+            color: var(--dark);
+        }
+
+        .registration-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .registration-info {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+        }
+
+        .registration-info h3 {
+            margin-bottom: 1rem;
+            font-size: 1.6rem;
+            color: var(--dark);
+        }
+
+        .registration-info p {
+            color: var(--gray);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .registration-info .benefit-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .registration-info .benefit-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .registration-info .benefit-list li i {
+            color: var(--primary);
+            margin-top: 0.25rem;
+        }
+
+        .register-panel {
+            background: white;
+            border-radius: 30px;
+            padding: 2rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+        }
+
+        .registration-stepper {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .registration-step {
+            flex: 1;
+            min-width: 0;
+            padding: 1rem 1rem 0.8rem;
+            border-radius: 20px;
+            background: var(--light);
+            text-align: center;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .registration-step::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            right: 10%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 999px;
+        }
+
+        .registration-step.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .registration-step span {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--gray);
+        }
+
+        .registration-step.active span {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .registration-step strong {
+            display: block;
+            font-size: 1rem;
+        }
+
+        .form-panel {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        .form-group textarea {
+            min-height: 140px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .form-actions button {
+            padding: 1rem 1.75rem;
+            border-radius: 999px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary-outline {
+            background: transparent;
+            color: var(--dark);
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary-outline:hover {
+            background: rgba(102, 126, 234, 0.08);
+        }
+
+        .register-summary {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.08));
+            border-radius: 20px;
+            padding: 2rem;
+            color: var(--dark);
+        }
+
+        .register-summary h4 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .register-summary p {
+            color: var(--gray);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .register-summary .summary-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+        }
+
+        .register-summary .summary-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .upload-box {
+            border: 2px dashed #cbd5e0;
+            border-radius: 20px;
+            background: #f7fafc;
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--gray);
+        }
+
+        .upload-box input {
+            display: none;
+        }
+
+        .upload-box label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.85rem 1.25rem;
+            background: white;
+            border-radius: 999px;
+            color: var(--primary);
+            cursor: pointer;
+            border: 1px solid #dbeafe;
+        }
+
+        .upload-note {
+            margin-top: 0.75rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .registration-success {
+            display: none;
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+        }
+
+        .registration-success.show {
+            display: block;
+        }
+
+        .registration-success i {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .registration-success h3 {
+            margin-bottom: 1rem;
+        }
+
+        .registration-success p {
+            color: var(--gray);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .registration-success .btn-primary {
+            padding: 1rem 2rem;
+        }
+
+        .req-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--light);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .req-item:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            transform: translateX(10px);
+        }
+
+        .req-item:hover * {
+            color: white !important;
+        }
+
+        .req-item i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        .req-item h4 {
+            font-size: 1.1rem;
+            color: var(--dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .req-item p {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        /* Calculator Section */
+        .calculator {
+            padding: 6rem 5%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+
+        .calculator .section-header h2,
+        .calculator .section-header p {
+            color: white;
+        }
+
+        .calc-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .calc-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group label i {
+            color: var(--primary);
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 1rem 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .calc-btn {
+            padding: 1.2rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .calc-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .calc-result {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f6f9fc, #edf2f7);
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .calc-result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-score {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-label {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+
+        .result-status {
+            display: inline-block;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .result-status.excellent {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+
+        .result-status.good {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+        }
+
+        .result-status.fair {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+        }
+
+        /* PTN Section */
+        .ptn-section {
+            padding: 6rem 5%;
+            background: var(--light);
+        }
+
+        .ptn-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .ptn-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .ptn-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2);
+        }
+
+        .ptn-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ptn-header::before {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -30px;
+            right: -30px;
+        }
+
+        .ptn-logo {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .ptn-logo i {
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .ptn-header h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .ptn-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .ptn-body {
+            padding: 1.5rem 2rem;
+        }
+
+        .ptn-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .ptn-stat:last-child {
+            border: none;
+        }
+
+        .ptn-stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .ptn-stat-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .ptn-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: var(--light);
+            color: var(--primary);
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .ptn-btn:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: 6rem 5%;
+            background: white;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--light);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .faq-item.active {
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+        }
+
+        .faq-question {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--dark);
+            transition: all 0.3s;
+        }
+
+        .faq-question:hover {
+            color: var(--primary);
+        }
+
+        .faq-question i {
+            font-size: 1.2rem;
+            color: var(--primary);
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-answer-content {
+            padding: 0 2rem 1.5rem;
+            color: var(--gray);
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 6rem 5%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='[w3.org](http://www.w3.org/2000/svg)'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+        }
+
+        .cta .btn-primary {
+            font-size: 1.1rem;
+            padding: 1.2rem 2.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark);
+            color: white;
+            padding: 4rem 5% 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-brand p {
+            color: rgba(255, 255, 255, 0.7);
+            margin: 1rem 0 1.5rem;
+            line-height: 1.8;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-social a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .footer-social a:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            transform: translateY(-3px);
+        }
+
+        .footer-links h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .footer-links h4::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 400px;
+            height: 100vh;
+            background: white;
+            z-index: 2000;
+            padding: 2rem;
+            transition: right 0.3s ease;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-menu-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 1rem;
+        }
+
+        .mobile-nav-links a {
+            display: block;
+            padding: 1rem;
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .mobile-nav-links a:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .hero-image {
+                display: none;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .about-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .req-container {
+                grid-template-columns: 1fr;
+            }
+
+            .registration-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions button {
+                width: 100%;
+            }
+
+            .req-image {
+                order: -1;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links, .nav-btn {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                margin-top: -30px;
+            }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item,
+            .timeline-item:nth-child(even) {
+                padding-left: 60px;
+                padding-right: 0;
+                justify-content: flex-start;
+            }
+
+            .timeline-item:nth-child(odd) .timeline-content,
+            .timeline-item:nth-child(even) .timeline-content {
+                margin: 0;
+                width: 100%;
+            }
+
+            .timeline-item:nth-child(odd) .timeline-dot,
+            .timeline-item:nth-child(even) .timeline-dot {
+                left: 10px;
+                right: auto;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-links h4::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .footer-social {
+                justify-content: center;
+            }
+        }
+
+        /* Scroll Animation */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <a href="#" class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            SNBP 2025
+        </a>
+        <ul class="nav-links">
+            <li><a href="#beranda">Beranda</a></li>
+            <li><a href="#tentang">Tentang</a></li>
+            <li><a href="#jadwal">Jadwal</a></li>
+            <li><a href="#syarat">Syarat</a></li>
+            <li><a href="#kalkulator">Kalkulator</a></li>
+            <li><a href="#ptn">PTN</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ul>
+        <button class="nav-btn" id="navRegisterBtn">Daftar Sekarang</button>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="overlay" id="overlay"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <a href="#" class="logo" style="color: var(--primary);">
+                <i class="fas fa-graduation-cap"></i>
+                SNBP
+            </a>
+            <i class="fas fa-times mobile-menu-close" id="mobileMenuClose"></i>
+        </div>
+        <ul class="mobile-nav-links">
+            <li><a href="#beranda">Beranda</a></li>
+            <li><a href="#tentang">Tentang</a></li>
+            <li><a href="#jadwal">Jadwal</a></li>
+            <li><a href="#syarat">Syarat</a></li>
+            <li><a href="#pendaftaran">Daftar</a></li>
+            <li><a href="#kalkulator">Kalkulator</a></li>
+            <li><a href="#ptn">PTN</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ul>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="beranda">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Raih Mimpimu dengan <span>SNBP 2025</span></h1>
+                <p>Seleksi Nasional Berdasarkan Prestasi adalah jalur masuk perguruan tinggi negeri berdasarkan prestasi akademik dan non-akademik. Persiapkan dirimu untuk masa depan yang gemilang!</p>
+                <div class="hero-buttons">
+                    <a href="#kalkulator" class="btn btn-primary">
+                        <i class="fas fa-calculator"></i>
+                        Hitung Peluangmu
+                    </a>
+                    <a href="#tentang" class="btn btn-secondary">
+                        <i class="fas fa-info-circle"></i>
+                        Pelajari Lebih
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-card">
+                    <div class="hero-card-content">
+                        <i class="fas fa-university"></i>
+                        <h3>99+ PTN</h3>
+                        <p>Perguruan Tinggi Negeri Terbaik</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stat-item animate-on-scroll">
+            <div class="stat-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <div class="stat-number" data-target="99">0</div>
+            <div class="stat-label">PTN Terdaftar</div>
+        </div>
+        <div class="stat-item animate-on-scroll">
+            <div class="stat-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div class="stat-number" data-target="3500">0</div>
+            <div class="stat-label">Program Studi</div>
+        </div>
+        <div class="stat-item animate-on-scroll">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-number" data-target="450000">0</div>
+            <div class="stat-label">Kuota Peserta</div>
+        </div>
+        <div class="stat-item animate-on-scroll">
+            <div class="stat-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="stat-number" data-target="40">0</div>
+            <div class="stat-label">% Daya Tampung</div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="tentang">
+        <div class="section-header animate-on-scroll">
+            <h2>Apa itu <span>SNBP</span>?</h2>
+            <p>Seleksi Nasional Berdasarkan Prestasi adalah jalur seleksi masuk perguruan tinggi negeri yang mengutamakan prestasi akademik dan non-akademik siswa.</p>
+        </div>
+        <div class="about-grid">
+            <div class="about-card animate-on-scroll">
+                <div class="about-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h3>Berbasis Prestasi</h3>
+                <p>Seleksi berdasarkan prestasi akademik (nilai rapor) dan prestasi non-akademik (kejuaraan, sertifikasi, dll) selama SMA/SMK/MA.</p>
+            </div>
+            <div class="about-card animate-on-scroll">
+                <div class="about-icon">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <h3>Tanpa Biaya</h3>
+                <p>Pendaftaran SNBP tidak dipungut biaya apapun. Siswa hanya perlu mempersiapkan dokumen dan data yang diperlukan.</p>
+            </div>
+            <div class="about-card animate-on-scroll">
+                <div class="about-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <h3>Pendaftaran Online</h3>
+                <p>Seluruh proses pendaftaran dilakukan secara online melalui portal resmi SNPMB untuk memudahkan akses dari seluruh Indonesia.</p>
+            </div>
+            <div class="about-card animate-on-scroll">
+                <div class="about-icon">
+                    <i class="fas fa-school"></i>
+                </div>
+                <h3>Kuota Sekolah</h3>
+                <p>Setiap sekolah memiliki kuota siswa yang dapat mendaftar berdasarkan akreditasi dan jumlah lulusan tahun sebelumnya.</p>
+            </div>
+            <div class="about-card animate-on-scroll">
+                <div class="about-icon">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <h3>Dua Pilihan PTN</h3>
+                <p>Siswa dapat memilih maksimal 2 program studi dari 2 PTN yang berbeda atau dari 1 PTN yang sama.</p>
+            </div>
+            <div class="about-card animate-on-scroll">
+                <div class="about-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Portofolio</h3>
+                <p>Untuk prodi tertentu (Seni, Olahraga), diperlukan portofolio sebagai bukti prestasi dan kemampuan khusus.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="timeline-section" id="jadwal">
+        <div class="section-header animate-on-scroll">
+            <h2>Jadwal <span>SNBP 2025</span></h2>
+            <p>Catat tanggal-tanggal penting berikut agar kamu tidak ketinggalan setiap tahapan seleksi.</p>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-date">03 - 07 Januari 2025</span>
+                    <h3>Registrasi Akun SNPMB</h3>
+                    <p>Siswa eligible membuat akun SNPMB Siswa di portal resmi dengan menggunakan NISN dan data diri.</p>
+                </div>
+            </div>
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-date">08 - 12 Januari 2025</span>
+                    <h3>Pengisian PDSS</h3>
+                    <p>Sekolah melakukan pengisian dan verifikasi data siswa di Pangkalan Data Sekolah dan Siswa (PDSS).</p>
+                </div>
+            </div>
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-date">13 - 27 Januari 2025</span>
+                    <h3>Pendaftaran SNBP</h3>
+                    <p>Siswa eligible melakukan pendaftaran SNBP dengan memilih program studi dan mengunggah portofolio jika diperlukan.</p>
+                </div>
+            </div>
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-date">28 Januari - 15 Maret 2025</span>
+                    <h3>Proses Seleksi</h3>
+                    <p>Panitia melakukan seleksi berdasarkan nilai rapor, prestasi, dan kriteria lainnya sesuai ketentuan PTN.</p>
+                </div>
+            </div>
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-dot"></div>
+                    <span class="timeline-date">25 Maret 2025</span>
+                    <h3>Pengumuman Hasil</h3>
+                    <p>Hasil seleksi diumumkan melalui portal SNPMB. Peserta lulus wajib melakukan daftar ulang di PTN tujuan.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Requirements Section -->
+    <section class="requirements" id="syarat">
+        <div class="req-container">
+            <div class="req-image animate-on-scroll">
+                <div class="req-image-box">
+                    <div class="req-image-content">
+                        <i class="fas fa-clipboard-check"></i>
+                        <h3>Persyaratan Lengkap</h3>
+                        <p>Pastikan memenuhi semua syarat</p>
+                    </div>
+                </div>
+            </div>
+            <div class="req-content">
+                <div class="section-header" style="text-align: left; margin: 0 0 2rem 0;">
+                    <h2>Syarat <span>Pendaftaran</span></h2>
+                    <p>Berikut adalah persyaratan yang harus dipenuhi untuk mendaftar SNBP 2025.</p>
+                </div>
+                <ul class="req-list">
+                    <li class="req-item animate-on-scroll">
+                        <i class="fas fa-user-graduate"></i>
+                        <div>
+                            <h4>Status Siswa</h4>
+                            <p>Siswa SMA/MA/SMK kelas 12 atau lulusan tahun sebelumnya yang belum pernah diterima di PTN.</p>
+                        </div>
+                    </li>
+                    <li class="req-item animate-on-scroll">
+                        <i class="fas fa-chart-bar"></i>
+                        <div>
+                            <h4>Prestasi Akademik</h4>
+                            <p>Memiliki prestasi akademik yang unggul dengan nilai rapor konsisten dari semester 1-5.</p>
+                        </div>
+                    </li>
+                    <li class="req-item animate-on-scroll">
+                        <i class="fas fa-medal"></i>
+                        <div>
+                            <h4>Prestasi Non-Akademik</h4>
+                            <p>Memiliki prestasi kejuaraan, sertifikasi kompetensi, atau pencapaian lain yang relevan.</p>
+                        </div>
+                    </li>
+                    <li class="req-item animate-on-scroll">
+                        <i class="fas fa-school"></i>
+                        <div>
+                            <h4>Rekomendasi Sekolah</h4>
+                            <p>Masuk dalam kuota siswa eligible yang ditetapkan sekolah berdasarkan akreditasi.</p>
+                        </div>
+                    </li>
+                    <li class="req-item animate-on-scroll">
+                        <i class="fas fa-file-alt"></i>
+                        <div>
+                            <h4>Dokumen Lengkap</h4>
+                            <p>NISN valid, data PDSS terverifikasi, dan portofolio untuk prodi tertentu.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="registration" id="pendaftaran">
+        <div class="section-header animate-on-scroll">
+            <h2>Pendaftaran <span>SNBP</span></h2>
+            <p>Isi data pendaftaran lengkap dengan langkah-langkah profesional. Fitur ini memvisualisasikan alur SNBP asli dengan gaya modern dan responsif.</p>
+        </div>
+        <div class="registration-grid animate-on-scroll">
+            <div class="registration-info">
+                <h3>Cara Daftar</h3>
+                <p>Masukkan data pribadi, data sekolah, dan pilihan PTN. Sistem akan memandu kamu dari awal hingga akhir agar pendaftaran terasa lengkap dan profesional.</p>
+                <ul class="benefit-list">
+                    <li><i class="fas fa-check-circle"></i> Data pribadi dan kontak tercatat dengan benar.</li>
+                    <li><i class="fas fa-check-circle"></i> Sekolah, jurusan, dan akreditasi terinput sesuai SNBP.</li>
+                    <li><i class="fas fa-check-circle"></i> Pilih dua PTN / prodi sesuai aturan SNBP.</li>
+                    <li><i class="fas fa-check-circle"></i> Upload bukti prestasi atau portofolio untuk prodi khusus.</li>
+                </ul>
+                <div class="register-summary">
+                    <h4>Ringkasan Cepat</h4>
+                    <p>Data yang kamu masukkan akan langsung muncul di panel ringkasan untuk memudahkan review sebelum submit.</p>
+                    <div class="summary-item">
+                        <span>Nama</span>
+                        <strong id="summaryName">-</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>NISN</span>
+                        <strong id="summaryNISN">-</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>PTN Pilihan</span>
+                        <strong id="summaryPTN">-</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="register-panel">
+                <div class="registration-stepper">
+                    <div class="registration-step active" data-step="1">
+                        <span>Langkah 1</span>
+                        <strong>Data Pribadi</strong>
+                    </div>
+                    <div class="registration-step" data-step="2">
+                        <span>Langkah 2</span>
+                        <strong>Data Sekolah</strong>
+                    </div>
+                    <div class="registration-step" data-step="3">
+                        <span>Langkah 3</span>
+                        <strong>Pilihan PTN</strong>
+                    </div>
+                </div>
+                <form id="registrationForm" class="form-panel">
+                    <div class="form-step active" data-step="1">
+                        <div class="form-group">
+                            <label>Nama Lengkap</label>
+                            <input type="text" id="regName" placeholder="Nama sesuai KTP/SKHUN" required>
+                        </div>
+                        <div class="form-group">
+                            <label>NISN</label>
+                            <input type="text" id="regNISN" placeholder="Contoh: 1234567890" maxlength="10" required>
+                        </div>
+                        <div class="field-grid">
+                            <div class="form-group">
+                                <label>Tempat, Tanggal Lahir</label>
+                                <input type="text" id="regBirth" placeholder="Contoh: Jakarta, 12 Agustus 2007" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Aktif</label>
+                                <input type="email" id="regEmail" placeholder="email@domain.com" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Nomor Telepon</label>
+                            <input type="tel" id="regPhone" placeholder="08xx xxxx xxxx" required>
+                        </div>
+                    </div>
+                    <div class="form-step" data-step="2">
+                        <div class="form-group">
+                            <label>Nama Sekolah</label>
+                            <input type="text" id="regSchool" placeholder="SMA Negeri 1 Contoh" required>
+                        </div>
+                        <div class="field-grid">
+                            <div class="form-group">
+                                <label>Jurusan</label>
+                                <select id="regMajor" required>
+                                    <option value="">Pilih Jurusan</option>
+                                    <option value="IPA">IPA</option>
+                                    <option value="IPS">IPS</option>
+                                    <option value="BAHASA">Bahasa</option>
+                                    <option value="SMK">SMK</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Akreditasi Sekolah</label>
+                                <select id="regAccreditation" required>
+                                    <option value="">Pilih Akreditasi</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field-grid">
+                            <div class="form-group">
+                                <label>NPSN</label>
+                                <input type="text" id="regNPSN" placeholder="Nomor Pokok Sekolah Nasional" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Rata-rata Nilai Rapor</label>
+                                <input type="number" id="regRapor" placeholder="Contoh: 88.50" min="0" max="100" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Rank di Sekolah</label>
+                            <select id="regRank" required>
+                                <option value="">Pilih Peringkat</option>
+                                <option value="1-10">Top 10</option>
+                                <option value="11-25">11-25</option>
+                                <option value="26-50">26-50</option>
+                                <option value="51+">51+</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-step" data-step="3">
+                        <div class="form-group">
+                            <label>PTN Pilihan Utama</label>
+                            <input type="text" id="regPTN1" placeholder="Contoh: Universitas Indonesia" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Program Studi Utama</label>
+                            <input type="text" id="regProdi1" placeholder="Contoh: Ilmu Komputer" required>
+                        </div>
+                        <div class="form-group">
+                            <label>PTN Pilihan Kedua</label>
+                            <input type="text" id="regPTN2" placeholder="Contoh: Institut Teknologi Bandung" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Program Studi Kedua</label>
+                            <input type="text" id="regProdi2" placeholder="Contoh: Sistem Informasi" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Prestasi Terbaik</label>
+                            <select id="regAchievement" required>
+                                <option value="">Pilih Prestasi</option>
+                                <option value="Internasional">Internasional</option>
+                                <option value="Nasional">Nasional</option>
+                                <option value="Provinsi">Provinsi</option>
+                                <option value="Kabupaten">Kabupaten/Kota</option>
+                                <option value="Sekolah">Sekolah</option>
+                            </select>
+                        </div>
+                        <div class="upload-box">
+                            <p><strong>Unggah Sertifikat / Portofolio</strong></p>
+                            <p>Format PDF maksimal 5MB. Untuk prodi seni/olahraga, sertakan portofolio.</p>
+                            <label for="regPortfolio"><i class="fas fa-upload"></i> Pilih Berkas</label>
+                            <input type="file" id="regPortfolio" accept="application/pdf,image/*">
+                            <p class="upload-note" id="uploadNote">Belum ada file dipilih.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Keterangan Singkat</label>
+                            <textarea id="regNotes" placeholder="Tulis ringkas prestasi, penghargaan, atau alasan memilih prodi ini..."></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary-outline" id="prevStepBtn">Sebelumnya</button>
+                        <button type="button" class="btn btn-primary" id="nextStepBtn">Berikutnya</button>
+                    </div>
+                </form>
+                <div class="registration-success" id="registrationSuccess">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Pendaftaran Berhasil!</h3>
+                    <p>Data kamu sudah siap diajukan. Simulasi ini membantu memvisualisasikan alur pendaftaran SNBP secara lengkap dan profesional.</p>
+                    <a href="#beranda" class="btn btn-primary">Kembali ke Beranda</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <section class="calculator" id="kalkulator">
+        <div class="section-header animate-on-scroll">
+            <h2>Kalkulator Peluang</h2>
+            <p>Hitung estimasi peluang kelulusanmu berdasarkan nilai rapor dan prestasi yang kamu miliki.</p>
+        </div>
+        <div class="calc-container animate-on-scroll">
+            <form class="calc-form" id="calcForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-book"></i> Rata-rata Nilai Rapor</label>
+                        <input type="number" id="nilaiRapor" placeholder="Contoh: 85.5" min="0" max="100" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-school"></i> Akreditasi Sekolah</label>
+                        <select id="akreditasi" required>
+                            <option value="">Pilih Akreditasi</option>
+                            <option value="A">A (Unggul)</option>
+                            <option value="B">B (Baik)</option>
+                            <option value="C">C (Cukup)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-trophy"></i> Tingkat Prestasi Tertinggi</label>
+                        <select id="prestasi" required>
+                            <option value="">Pilih Tingkat Prestasi</option>
+                            <option value="internasional">Internasional</option>
+                            <option value="nasional">Nasional</option>
+                            <option value="provinsi">Provinsi</option>
+                            <option value="kabupaten">Kabupaten/Kota</option>
+                            <option value="sekolah">Sekolah/Tidak Ada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-university"></i> Target PTN</label>
+                        <select id="targetPTN" required>
+                            <option value="">Pilih Tingkat PTN</option>
+                            <option value="top">Top 10 (UI, UGM, ITB, dll)</option>
+                            <option value="favorit">Favorit (UNPAD, UNDIP, dll)</option>
+                            <option value="menengah">Menengah</option>
+                            <option value="lainnya">PTN Lainnya</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-sort-numeric-up"></i> Peringkat di Sekolah</label>
+                    <select id="peringkat" required>
+                        <option value="">Pilih Peringkat</option>
+                        <option value="1-10">Top 10</option>
+                        <option value="11-25">Peringkat 11-25</option>
+                        <option value="26-50">Peringkat 26-50</option>
+                        <option value="51+">Peringkat 51+</option>
+                    </select>
+                </div>
+                <button type="submit" class="calc-btn">
+                    <i class="fas fa-calculator"></i>
+                    Hitung Peluang
+                </button>
+            </form>
+            <div class="calc-result" id="calcResult">
+                <div class="result-label">Estimasi Peluang Kelulusan</div>
+                <div class="result-score" id="resultScore">0%</div>
+                <div class="result-status" id="resultStatus">-</div>
+                <p style="margin-top: 1rem; color: var(--gray); font-size: 0.9rem;" id="resultNote"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PTN Section -->
+    <section class="ptn-section" id="ptn">
+        <div class="section-header animate-on-scroll">
+            <h2>PTN <span>Populer</span></h2>
+            <p>Jelajahi perguruan tinggi negeri terpopuler yang bisa kamu pilih melalui jalur SNBP.</p>
+        </div>
+        <div class="ptn-grid">
+            <div class="ptn-card animate-on-scroll">
+                <div class="ptn-header">
+                    <div class="ptn-logo">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h3>Universitas Indonesia</h3>
+                    <p>Depok, Jawa Barat</p>
+                </div>
+                <div class="ptn-body">
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Kuota SNBP</span>
+                        <span class="ptn-stat-value">4.500+</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Jumlah Prodi</span>
+                        <span class="ptn-stat-value">87</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Keketatan Rata-rata</span>
+                        <span class="ptn-stat-value">1:40</span>
+                    </div>
+                </div>
+                <a href="#ptn" class="ptn-btn" onclick="showPTNDetail(event, 'Universitas Indonesia')">Lihat Detail <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="ptn-card animate-on-scroll">
+                <div class="ptn-header" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                    <div class="ptn-logo">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h3>Universitas Gadjah Mada</h3>
+                    <p>Yogyakarta</p>
+                </div>
+                <div class="ptn-body">
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Kuota SNBP</span>
+                        <span class="ptn-stat-value">5.000+</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Jumlah Prodi</span>
+                        <span class="ptn-stat-value">93</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Keketatan Rata-rata</span>
+                        <span class="ptn-stat-value">1:35</span>
+                    </div>
+                </div>
+                <a href="#ptn" class="ptn-btn" onclick="showPTNDetail(event, 'Universitas Gadjah Mada')">Lihat Detail <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="ptn-card animate-on-scroll">
+                <div class="ptn-header" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                    <div class="ptn-logo">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h3>Institut Teknologi Bandung</h3>
+                    <p>Bandung, Jawa Barat</p>
+                </div>
+                <div class="ptn-body">
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Kuota SNBP</span>
+                        <span class="ptn-stat-value">2.500+</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Jumlah Prodi</span>
+                        <span class="ptn-stat-value">48</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Keketatan Rata-rata</span>
+                        <span class="ptn-stat-value">1:50</span>
+                    </div>
+                </div>
+                <a href="#ptn" class="ptn-btn" onclick="showPTNDetail(event, 'Institut Teknologi Bandung')">Lihat Detail <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="ptn-card animate-on-scroll">
+                <div class="ptn-header" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+                    <div class="ptn-logo">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h3>Universitas Airlangga</h3>
+                    <p>Surabaya, Jawa Timur</p>
+                </div>
+                <div class="ptn-body">
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Kuota SNBP</span>
+                        <span class="ptn-stat-value">4.200+</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Jumlah Prodi</span>
+                        <span class="ptn-stat-value">65</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Keketatan Rata-rata</span>
+                        <span class="ptn-stat-value">1:30</span>
+                    </div>
+                </div>
+                <a href="#ptn" class="ptn-btn" onclick="showPTNDetail(event, 'Universitas Airlangga')">Lihat Detail <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="ptn-card animate-on-scroll">
+                <div class="ptn-header" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">
+                    <div class="ptn-logo">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h3>Universitas Diponegoro</h3>
+                    <p>Semarang, Jawa Tengah</p>
+                </div>
+                <div class="ptn-body">
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Kuota SNBP</span>
+                        <span class="ptn-stat-value">4.800+</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Jumlah Prodi</span>
+                        <span class="ptn-stat-value">62</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Keketatan Rata-rata</span>
+                        <span class="ptn-stat-value">1:28</span>
+                    </div>
+                </div>
+                <a href="#ptn" class="ptn-btn" onclick="showPTNDetail(event, 'Universitas Diponegoro')">Lihat Detail <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="ptn-card animate-on-scroll">
+                <div class="ptn-header" style="background: linear-gradient(135deg, #d299c2, #fef9d7);">
+                    <div class="ptn-logo">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h3>Universitas Padjadjaran</h3>
+                    <p>Bandung, Jawa Barat</p>
+                </div>
+                <div class="ptn-body">
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Kuota SNBP</span>
+                        <span class="ptn-stat-value">4.000+</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Jumlah Prodi</span>
+                        <span class="ptn-stat-value">55</span>
+                    </div>
+                    <div class="ptn-stat">
+                        <span class="ptn-stat-label">Keketatan Rata-rata</span>
+                        <span class="ptn-stat-value">1:32</span>
+                    </div>
+                </div>
+                <a href="#ptn" class="ptn-btn" onclick="showPTNDetail(event, 'Universitas Padjadjaran')">Lihat Detail <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="section-header animate-on-scroll">
+            <h2>Pertanyaan <span>Umum</span></h2>
+            <p>Temukan jawaban untuk pertanyaan yang sering diajukan seputar SNBP 2025.</p>
+        </div>
+        <div class="faq-container">
+            <div class="faq-item animate-on-scroll">
+                <div class="faq-question">
+                    <span>Apa perbedaan SNBP dengan SNBT?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        SNBP (Seleksi Nasional Berdasarkan Prestasi) adalah jalur seleksi berdasarkan nilai rapor dan prestasi tanpa tes tertulis. Sedangkan SNBT (Seleksi Nasional Berdasarkan Tes) adalah jalur seleksi melalui tes tertulis menggunakan UTBK. SNBP dilaksanakan lebih dulu dan hasilnya diumumkan sebelum pelaksanaan SNBT.
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item animate-on-scroll">
+                <div class="faq-question">
+                    <span>Apakah bisa memilih prodi lintas jurusan?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Ya, siswa SMA/MA dapat memilih prodi lintas jurusan dengan ketentuan tertentu. Siswa IPA dapat memilih prodi IPS, namun siswa IPS tidak dapat memilih prodi IPA murni. Untuk SMK, pemilihan prodi disesuaikan dengan bidang keahlian atau prodi yang menerima lulusan SMK.
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item animate-on-scroll">
+                <div class="faq-question">
+                    <span>Berapa kuota siswa yang bisa mendaftar dari setiap sekolah?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Kuota siswa eligible ditentukan berdasarkan akreditasi sekolah: Akreditasi A mendapat 40% dari jumlah siswa, Akreditasi B mendapat 25%, dan Akreditasi C mendapat 5%. Persentase ini dihitung dari total siswa yang lulus pada tahun sebelumnya.
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item animate-on-scroll">
+                <div class="faq-question">
+                    <span>Bagaimana jika tidak lulus SNBP?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Jika tidak lulus SNBP, siswa masih memiliki kesempatan untuk mengikuti SNBT (Seleksi Nasional Berdasarkan Tes) dengan mendaftar dan mengikuti UTBK. Selain itu, tersedia jalur mandiri yang diselenggarakan masing-masing PTN dengan jadwal dan ketentuan berbeda.
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item animate-on-scroll">
+                <div class="faq-question">
+                    <span>Apakah ada biaya pendaftaran SNBP?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Tidak ada biaya pendaftaran untuk SNBP. Seluruh proses pendaftaran gratis. Siswa hanya perlu memiliki akses internet untuk mendaftar secara online melalui portal resmi SNPMB. Waspada terhadap pihak yang meminta biaya dengan mengatasnamakan SNBP.
+                    </div>
+                </div>
+            </div>
+            <div class="faq-item animate-on-scroll">
+                <div class="faq-question">
+                    <span>Apa itu portofolio dan siapa yang wajib mengunggahnya?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Portofolio adalah kumpulan karya atau bukti kemampuan yang wajib diunggah oleh pendaftar prodi bidang Seni dan Olahraga. Portofolio dapat berupa video penampilan, dokumentasi karya, atau sertifikat prestasi sesuai ketentuan masing-masing prodi dan PTN.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="cta-content animate-on-scroll">
+            <h2>Siap Meraih Masa Depanmu?</h2>
+            <p>Jangan lewatkan kesempatan emas untuk masuk PTN impian melalui jalur SNBP 2025. Persiapkan dirimu dari sekarang!</p>
+            <a href="https://snpmb.bppp.kemdikbud.go.id" target="_blank" class="btn btn-primary">
+                <i class="fas fa-external-link-alt"></i>
+                Kunjungi Portal SNPMB
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="#" class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    SNBP 2025
+                </a>
+                <p>Website informasi lengkap seputar Seleksi Nasional Berdasarkan Prestasi untuk calon mahasiswa Indonesia.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Menu</h4>
+                <ul>
+                    <li><a href="#beranda">Beranda</a></li>
+                    <li><a href="#tentang">Tentang SNBP</a></li>
+                    <li><a href="#jadwal">Jadwal</a></li>
+                    <li><a href="#syarat">Persyaratan</a></li>
+                    <li><a href="#kalkulator">Kalkulator</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Informasi</h4>
+                <ul>
+                    <li><a href="#beranda">Panduan Pendaftaran</a></li>
+                    <li><a href="#kalkulator">Daftar PTN</a></li>
+                    <li><a href="#ptn">Daftar Prodi</a></li>
+                    <li><a href="#faq">Tips & Trik</a></li>
+                    <li><a href="mailto:info@snbp.com">Kontak</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Link Resmi</h4>
+                <ul>
+                    <li><a href="https://snpmb.bppp.kemdikbud.go.id" target="_blank">Portal SNPMB</a></li>
+                    <li><a href="https://www.kemdikbud.go.id" target="_blank">Kemendikbud</a></li>
+                    <li><a href="https://www.ltmpt.ac.id" target="_blank">LTMPT</a></li>
+                    <li><a href="https://pdss.ristekdikti.go.id" target="_blank">PDSS</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SNBP Info. Website ini bukan situs resmi SNPMB. Untuk informasi resmi kunjungi snpmb.bppp.kemdikbud.go.id</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar Scroll Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile Menu
+        const hamburger = document.getElementById('hamburger');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuClose = document.getElementById('mobileMenuClose');
+        const overlay = document.getElementById('overlay');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
+
+        hamburger.addEventListener('click', () => {
+            mobileMenu.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        mobileMenuClose.addEventListener('click', closeMobileMenu);
+        overlay.addEventListener('click', closeMobileMenu);
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offsetTop = target.offsetTop - 80;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Counter Animation
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                if (target >= 1000) {
+                    element.textContent = Math.floor(current).toLocaleString('id-ID') + '+';
+                } else {
+                    element.textContent = Math.floor(current) + (target === 40 ? '%' : '+');
+                }
+            }, 20);
+        }
+
+        // Scroll Animation
+        const animateOnScroll = () => {
+            const elements = document.querySelectorAll('.animate-on-scroll');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                if (elementTop < windowHeight - 100) {
+                    element.classList.add('animated');
+                    
+                    // Trigger counter animation for stat numbers
+                    const statNumber = element.querySelector('.stat-number');
+                    if (statNumber && !statNumber.classList.contains('counted')) {
+                        statNumber.classList.add('counted');
+                        const target = parseInt(statNumber.dataset.target);
+                        animateCounter(statNumber, target);
+                    }
+                }
+            });
+        };
+
+        window.addEventListener('scroll', animateOnScroll);
+        window.addEventListener('load', animateOnScroll);
+
+        // FAQ Accordion
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            question.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                faqItems.forEach(i => i.classList.remove('active'));
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // Calculator
+        const calcForm = document.getElementById('calcForm');
+        const calcResult = document.getElementById('calcResult');
+        const resultScore = document.getElementById('resultScore');
+        const resultStatus = document.getElementById('resultStatus');
+        const resultNote = document.getElementById('resultNote');
+
+        calcForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const nilaiRapor = parseFloat(document.getElementById('nilaiRapor').value);
+            const akreditasi = document.getElementById('akreditasi').value;
+            const prestasi = document.getElementById('prestasi').value;
+            const targetPTN = document.getElementById('targetPTN').value;
+            const peringkat = document.getElementById('peringkat').value;
+
+            let score = 0;
+
+            // Nilai Rapor (max 40)
+            if (nilaiRapor >= 90) score += 40;
+            else if (nilaiRapor >= 85) score += 35;
+            else if (nilaiRapor >= 80) score += 30;
+            else if (nilaiRapor >= 75) score += 25;
+            else score += 20;
+
+            // Akreditasi (max 15)
+            if (akreditasi === 'A') score += 15;
+            else if (akreditasi === 'B') score += 10;
+            else score += 5;
+
+            // Prestasi (max 25)
+            const prestasiScore = {
+                'internasional': 25,
+                'nasional': 20,
+                'provinsi': 15,
+                'kabupaten': 10,
+                'sekolah': 5
+            };
+            score += prestasiScore[prestasi] || 0;
+
+            // Peringkat (max 20)
+            const peringkatScore = {
+                '1-10': 20,
+                '11-25': 15,
+                '26-50': 10,
+                '51+': 5
+            };
+            score += peringkatScore[peringkat] || 0;
+
+            // Adjust based on target PTN
+            const ptnMultiplier = {
+                'top': 0.7,
+                'favorit': 0.8,
+                'menengah': 0.9,
+                'lainnya': 1.0
+            };
+            score = Math.round(score * ptnMultiplier[targetPTN]);
+
+            // Cap at 95%
+            score = Math.min(score, 95);
+
+            // Display result
+            resultScore.textContent = score + '%';
+            
+            if (score >= 75) {
+                resultStatus.textContent = '🎯 Peluang Sangat Baik!';
+                resultStatus.className = 'result-status excellent';
+                resultNote.textContent = 'Pertahankan prestasimu dan persiapkan dokumen dengan baik!';
+            } else if (score >= 50) {
+                resultStatus.textContent = '👍 Peluang Cukup Baik';
+                resultStatus.className = 'result-status good';
+                resultNote.textContent = 'Tingkatkan nilai dan kumpulkan lebih banyak prestasi!';
+            } else {
+                resultStatus.textContent = '💪 Perlu Usaha Lebih';
+                resultStatus.className = 'result-status fair';
+                resultNote.textContent = 'Pertimbangkan PTN alternatif atau persiapkan SNBT dengan baik!';
+            }
+
+            calcResult.classList.add('show');
+            calcResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+
+        // Add active state to nav links based on scroll position
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-links a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Register Button Handler
+        const navRegisterBtn = document.getElementById('navRegisterBtn');
+        navRegisterBtn.addEventListener('click', () => {
+            const targetSection = document.querySelector('#pendaftaran');
+            if (targetSection) {
+                const offsetTop = targetSection.offsetTop - 80;
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
+                setTimeout(() => {
+                    document.getElementById('regName').focus();
+                }, 500);
+            }
+        });
+
+        // PTN Detail Handler
+        function showPTNDetail(event, ptnName) {
+            event.preventDefault();
+            const title = event.target.closest('.ptn-btn').parentElement.querySelector('h3').textContent;
+            alert(`Details untuk ${title}:\n\nUntuk informasi lebih lengkap, silakan kunjungi Portal SNPMB resmi atau hubungi kantor admisi universitas tersebut.`);
+        }
+
+        // Registration Wizard
+        const registrationForm = document.getElementById('registrationForm');
+        const registrationSteps = document.querySelectorAll('.registration-step');
+        const formSteps = document.querySelectorAll('.form-step');
+        const prevStepBtn = document.getElementById('prevStepBtn');
+        const nextStepBtn = document.getElementById('nextStepBtn');
+        const registrationSuccess = document.getElementById('registrationSuccess');
+        const uploadNote = document.getElementById('uploadNote');
+        const regPortfolio = document.getElementById('regPortfolio');
+
+        let currentStep = 1;
+
+        function updateWizard() {
+            registrationSteps.forEach(step => {
+                step.classList.toggle('active', parseInt(step.dataset.step) === currentStep);
+            });
+            formSteps.forEach(panel => {
+                panel.classList.toggle('active', parseInt(panel.dataset.step) === currentStep);
+            });
+            prevStepBtn.style.display = currentStep === 1 ? 'none' : 'inline-flex';
+            nextStepBtn.textContent = currentStep === formSteps.length ? 'Submit Pendaftaran' : 'Berikutnya';
+        }
+
+        function validateStep(step) {
+            const fields = document.querySelectorAll(`.form-step[data-step="${step}"] input[required], .form-step[data-step="${step}"] select[required]`);
+            return Array.from(fields).every(field => field.value.trim() !== '');
+        }
+
+        function fillSummary() {
+            document.getElementById('summaryName').textContent = document.getElementById('regName').value || '-';
+            document.getElementById('summaryNISN').textContent = document.getElementById('regNISN').value || '-';
+            const ptn1 = document.getElementById('regPTN1').value || '-';
+            const ptn2 = document.getElementById('regPTN2').value || '-';
+            document.getElementById('summaryPTN').textContent = `${ptn1} / ${ptn2}`;
+        }
+
+        nextStepBtn.addEventListener('click', () => {
+            if (!validateStep(currentStep)) {
+                alert('Lengkapi semua data yang wajib diisi pada langkah ini.');
+                return;
+            }
+
+            if (currentStep < formSteps.length) {
+                currentStep += 1;
+                updateWizard();
+                fillSummary();
+            } else {
+                // Final submit simulation
+                registrationForm.style.display = 'none';
+                registrationSuccess.classList.add('show');
+                fillSummary();
+            }
+        });
+
+        prevStepBtn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep -= 1;
+                updateWizard();
+            }
+        });
+
+        regPortfolio.addEventListener('change', () => {
+            const file = regPortfolio.files[0];
+            if (!file) {
+                uploadNote.textContent = 'Belum ada file dipilih.';
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                uploadNote.textContent = 'Ukuran file terlalu besar. Pilih file di bawah 5MB.';
+                regPortfolio.value = '';
+                return;
+            }
+            uploadNote.textContent = `File dipilih: ${file.name}`;
+        });
+
+        // Initialize wizard on load
+        updateWizard();
+    </script>
+</body>
+</html>

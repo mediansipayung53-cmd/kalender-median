@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalender 2026 - Complete Edition</title>
+    <style>
+        /* --- RESET & STYLE --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover fixed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1;
+        }
+
+        /* --- HEADER --- */
+        .nav-header {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            padding: 15px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .icons span {
+            height: 40px; width: 40px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 40px;
+            font-size: 1.8rem;
+            border-radius: 50%;
+            transition: 0.3s;
+            display: inline-block;
+            user-select: none;
+        }
+
+        .icons span:hover { background: rgba(255, 255, 255, 0.3); }
+
+        /* --- GRID KALENDER --- */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 20px;
+        }
+
+        .month-wrapper {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .month-name {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 8px;
+        }
+
+        .weeks, .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            list-style: none;
+        }
+
+        .weeks li { font-weight: 600; font-size: 0.75rem; color: #ffb3b3; padding-bottom: 10px; }
+
+        .days li {
+            font-size: 0.9rem;
+            height: 38px;
+            line-height: 38px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .days li:hover:not(.inactive) { background: rgba(255, 255, 255, 0.3); }
+        .days li.active { background: #fff; color: #333 !important; font-weight: bold; }
+        .days li.inactive { color: rgba(255, 255, 255, 0.3); }
+
+        /* --- TANGGAL MERAH --- */
+        .days li.holiday { color: #ff4d4d; font-weight: bold; }
+        .days li.holiday::after {
+            content: ''; position: absolute; bottom: 5px; left: 50%;
+            transform: translateX(-50%); width: 4px; height: 4px;
+            background: #ff4d4d; border-radius: 50%;
+        }
+
+        /* --- KETERANGAN LIBUR (BAWAH) --- */
+        .holiday-info {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .holiday-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #ffb3b3;
+            border-left: 4px solid #ff4d4d;
+            padding-left: 15px;
+        }
+
+        .holiday-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            list-style: none;
+        }
+
+        .holiday-item {
+            font-size: 0.9rem;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .holiday-date {
+            font-weight: bold;
+            color: #ff4d4d;
+            margin-right: 10px;
+            min-width: 80px;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media screen and (max-width: 1000px) { .calendar-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media screen and (max-width: 700px) { .calendar-grid { grid-template-columns: 1fr; } }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+</head>
+<body>
+
+    <div class="nav-header">
+        <h2 id="view-label">Januari - Maret 2026</h2>
+        <div class="icons">
+            <span id="prev" class="material-symbols-rounded">chevron_left</span>
+            <span id="next" class="material-symbols-rounded">chevron_right</span>
+        </div>
+    </div>
+
+    <div class="calendar-grid" id="calendar-grid"></div>
+
+    <div class="holiday-info">
+        <h3>Keterangan Libur Nasional</h3>
+        <ul class="holiday-list" id="holiday-list-display">
+            </ul>
+    </div>
+
+    <script>
+        const calendarGrid = document.getElementById("calendar-grid");
+        const viewLabel = document.getElementById("view-label");
+        const holidayDisplay = document.getElementById("holiday-list-display");
+        const prevNextIcon = document.querySelectorAll(".icons span");
+
+        let startMonth = 0; 
+        let currYear = 2026;
+
+        const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli",
+                      "Agustus", "September", "Oktober", "November", "Desember"];
+
+        const holidays2026 = {
+            "0-1": "Tahun Baru 2026 Masehi",
+            "1-14": "Isra Mi'raj Nabi Muhammad SAW",
+            "1-17": "Tahun Baru Imlek 2577 Kongzili",
+            "2-19": "Hari Suci Nyepi (Tahun Baru Saka 1948)",
+            "2-20": "Hari Raya Idul Fitri 1447 H (Hari 1)",
+            "2-21": "Hari Raya Idul Fitri 1447 H (Hari 2)",
+            "3-3": "Wafat Yesus Kristus",
+            "3-5": "Hari Paskah",
+            "4-1": "Hari Buruh Internasional",
+            "4-14": "Kenaikan Yesus Kristus",
+            "4-27": "Hari Raya Idul Adha 1447 H",
+            "4-31": "Hari Raya Waisak 2570 BE",
+            "5-1": "Hari Lahir Pancasila",
+            "5-16": "Tahun Baru Islam 1448 H",
+            "7-17": "Hari Kemerdekaan RI",
+            "7-26": "Maulid Nabi Muhammad SAW",
+            "11-25": "Hari Raya Natal"
+        };
+
+        const renderCalendar = () => {
+            calendarGrid.innerHTML = "";
+            holidayDisplay.innerHTML = "";
+            let endMonth = startMonth + 2;
+            
+            viewLabel.innerText = `${months[startMonth]} - ${months[endMonth]} ${currYear}`;
+
+            for (let m = startMonth; m <= endMonth; m++) {
+                let firstDay = new Date(currYear, m, 1).getDay();
+                let lastDate = new Date(currYear, m + 1, 0).getDate();
+                let lastDay = new Date(currYear, m, lastDate).getDay();
+                let lastDatePrev = new Date(currYear, m, 0).getDate();
+
+                let daysHtml = "";
+
+                for (let i = firstDay; i > 0; i--) {
+                    daysHtml += `<li class="inactive">${lastDatePrev - i + 1}</li>`;
+                }
+
+                for (let i = 1; i <= lastDate; i++) {
+                    let dateKey = `${m}-${i}`;
+                    let dayOfWeek = new Date(currYear, m, i).getDay();
+                    let isToday = (i === new Date().getDate() && m === new Date().getMonth() && currYear === new Date().getFullYear()) ? "active" : "";
+                    
+                    let holidayName = holidays2026[dateKey] || "";
+                    let isSunday = (dayOfWeek === 0);
+                    let holidayClass = (holidayName || isSunday) ? "holiday" : "";
+
+                    daysHtml += `<li class="${isToday} ${holidayClass}">${i}</li>`;
+
+                    // Tambahkan ke daftar keterangan di bawah jika itu hari libur (bukan sekedar minggu)
+                    if (holidayName) {
+                        holidayDisplay.innerHTML += `
+                            <li class="holiday-item">
+                                <span class="holiday-date">${i} ${months[m]}</span>
+                                <span>${holidayName}</span>
+                            </li>
+                        `;
+                    }
+                }
+
+                for (let i = lastDay; i < 6; i++) {
+                    daysHtml += `<li class="inactive">${i - lastDay + 1}</li>`;
+                }
+
+                calendarGrid.innerHTML += `
+                    <div class="month-wrapper">
+                        <div class="month-name">${months[m]}</div>
+                        <ul class="weeks">
+                            <li>Min</li><li>Sen</li><li>Sel</li><li>Rab</li><li>Kam</li><li>Jum</li><li>Sab</li>
+                        </ul>
+                        <ul class="days">${daysHtml}</ul>
+                    </div>
+                `;
+            }
+
+            if (holidayDisplay.innerHTML === "") {
+                holidayDisplay.innerHTML = "<p style='opacity:0.6'>Tidak ada hari libur nasional pada periode ini.</p>";
+            }
+        }
+
+        renderCalendar();
+
+        prevNextIcon.forEach(icon => {
+            icon.addEventListener("click", () => {
+                if(icon.id === "prev") {
+                    startMonth -= 3;
+                    if(startMonth < 0) { startMonth = 9; currYear--; }
+                } else {
+                    startMonth += 3;
+                    if(startMonth > 11) { startMonth = 0; currYear++; }
+                }
+                renderCalendar();
+            });
+        });
+    </script>
+</body>
+</html>

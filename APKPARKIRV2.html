@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberPunk Parking System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050510; --bg2: #0a0a1a; --fg: #e0e6ff; --fgm: #5a6080;
+            --cyan: #00f0ff; --magenta: #ff00aa; --glass: rgba(15,15,35,0.6);
+            --glow: rgba(0,240,255,0.2);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--fg); min-height: 100vh; overflow-x: hidden; }
+
+        /* Effects Layer */
+        .crt-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 10000; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 3px); }
+        .crt-overlay::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%); }
+        .film-grain { position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.04; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: grain 0.4s steps(5) infinite; }
+        @keyframes grain { 0%,100% { transform: translate(0,0); } 25% { transform: translate(-2%,-2%); } 50% { transform: translate(1%,-1%); } 75% { transform: translate(-1%,2%); } }
+        #rain-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+        .city-bg { position: fixed; bottom: 0; left: 0; width: 100%; height: 45%; background: linear-gradient(to top, rgba(0,240,255,0.02), transparent); z-index: 0; }
+        .city-bg::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 2px 10px at 8% 92%, var(--cyan), transparent), radial-gradient(ellipse 3px 14px at 12% 85%, var(--magenta), transparent), radial-gradient(ellipse 4px 20px at 25% 78%, var(--magenta), transparent), radial-gradient(ellipse 3px 16px at 40% 82%, var(--magenta), transparent), radial-gradient(ellipse 4px 22px at 55% 76%, var(--magenta), transparent); filter: blur(1px); animation: city-pulse 3s ease-in-out infinite; }
+        @keyframes city-pulse { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
+        .ground-reflection { position: fixed; bottom: 0; left: 0; width: 100%; height: 20%; background: linear-gradient(to top, rgba(0,240,255,0.08), rgba(255,0,170,0.04) 40%, transparent); z-index: 0; animation: shimmer 4s ease-in-out infinite; }
+        @keyframes shimmer { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+        /* Glass Card */
+        .glass { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glow); border-radius: 16px; position: relative; overflow: hidden; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
+        .glass::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); opacity: 0.6; }
+        .glass::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); transition: left 0.8s ease; }
+        .glass:hover::after { left: 100%; }
+        .glass:hover { border-color: rgba(0,240,255,0.5); box-shadow: 0 0 30px rgba(0,240,255,0.15), inset 0 0 40px rgba(0,240,255,0.03); transform: translateY(-4px); }
+
+        /* Typography */
+        .neon-cyan { color: var(--cyan); text-shadow: 0 0 5px rgba(0,240,255,0.8), 0 0 15px rgba(0,240,255,0.5); }
+        .neon-magenta { color: var(--magenta); text-shadow: 0 0 5px rgba(255,0,170,0.8), 0 0 15px rgba(255,0,170,0.5); }
+
+        /* Login */
+        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; position: relative; z-index: 10; }
+        .login-card { max-width: 420px; width: 100%; padding: 50px 40px; border-radius: 20px; animation: float 4s ease-in-out infinite; }
+        .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--cyan)); background-size: 200% 100%; animation: border-flow 3s linear infinite; }
+        @keyframes border-flow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .login-title { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 800; letter-spacing: 3px; margin-bottom: 8px; background: linear-gradient(135deg, var(--cyan), var(--magenta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .login-subtitle { color: var(--fgm); font-size: 1rem; letter-spacing: 4px; text-transform: uppercase; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 20px; }
+        .cyber-input, .cyber-select { width: 100%; padding: 14px 18px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,240,255,0.2); border-radius: 10px; color: var(--fg); font-family: inherit; font-size: 16px; font-weight: 500; transition: all 0.3s ease; letter-spacing: 1px; }
+        .cyber-input::placeholder { color: var(--fgm); }
+        .cyber-input:focus, .cyber-select:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 20px rgba(0,240,255,0.2); background: rgba(0,20,30,0.6); }
+        .cyber-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='%2300f0ff' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 40px; }
+        .cyber-select option { background: var(--bg2); color: var(--fg); }
+
+        /* Buttons */
+        .btn { font-family: 'Orbitron', sans-serif; font-weight: 600; padding: 12px 24px; border-radius: 8px; border: 1px solid; background: transparent; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; position: relative; overflow: hidden; }
+        .btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, currentColor, transparent); transition: left 0.5s ease; opacity: 0.1; }
+        .btn:hover::before { left: 100%; }
+        .btn-primary { border-color: var(--cyan); color: var(--cyan); }
+        .btn-primary:hover { background: rgba(0,240,255,0.15); box-shadow: 0 0 25px rgba(0,240,255,0.3); text-shadow: 0 0 10px var(--cyan); }
+        .btn-warning { border-color: #f0a500; color: #f0a500; }
+        .btn-warning:hover { background: rgba(240,165,0,0.15); box-shadow: 0 0 25px rgba(240,165,0,0.3); }
+        .btn-danger { border-color: var(--magenta); color: var(--magenta); }
+        .btn-danger:hover { background: rgba(255,0,170,0.15); box-shadow: 0 0 25px rgba(255,0,170,0.3); }
+        .btn-success { border-color: #00ff88; color: #00ff88; }
+        .btn-success:hover { background: rgba(0,255,136,0.15); box-shadow: 0 0 25px rgba(0,255,136,0.3); }
+        .btn-cyber { padding: 14px 28px; border-radius: 10px; border: 1px solid var(--cyan); color: var(--cyan); }
+        .btn-full { width: 100%; }
+        .btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        /* Main App */
+        .main-app { display: none; min-height: 100vh; position: relative; z-index: 10; }
+
+        /* Navigation */
+        .nav-container { position: fixed; top: 0; left: 0; right: 0; background: var(--glass); backdrop-filter: blur(25px); border-bottom: 1px solid var(--glow); padding: 15px 0; z-index: 1000; }
+        .nav-container::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), var(--magenta), transparent); }
+        .nav-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 15px; }
+        .nav-btn { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; padding: 10px 18px; background: transparent; border: 1px solid rgba(0,240,255,0.3); border-radius: 8px; color: var(--fgm); cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; position: relative; }
+        .nav-btn::before { content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 2px; background: var(--cyan); transition: all 0.3s ease; transform: translateX(-50%); }
+        .nav-btn:hover, .nav-btn.active { color: var(--cyan); border-color: var(--cyan); background: rgba(0,240,255,0.08); }
+        .nav-btn:hover::before, .nav-btn.active::before { width: 60%; }
+        .nav-btn.logout-btn { border-color: rgba(255,0,170,0.3); }
+        .nav-btn.logout-btn:hover { color: var(--magenta); border-color: var(--magenta); background: rgba(255,0,170,0.08); }
+        .nav-btn.logout-btn::before { background: var(--magenta); }
+
+        /* Hamburger */
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 10px; z-index: 1002; position: absolute; right: 15px; top: 12px; }
+        .hamburger span { display: block; width: 24px; height: 2px; background: var(--cyan); transition: all 0.3s ease; border-radius: 2px; }
+        .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+        .mobile-menu { position: fixed; top: 0; right: -280px; width: 280px; height: 100vh; background: var(--bg2); backdrop-filter: blur(30px); border-left: 1px solid var(--glow); padding: 80px 20px 20px; z-index: 1001; transition: right 0.4s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; gap: 8px; }
+        .mobile-menu.open { right: 0; }
+        .mobile-menu .nav-btn { width: 100%; text-align: center; padding: 14px; }
+
+        /* Slides */
+        .slide { display: none; padding: 100px 20px 40px; min-height: 100vh; max-width: 1400px; margin: 0 auto; animation: slideIn 0.6s ease-out; }
+        .slide.active { display: block; }
+        @keyframes slideIn { 0% { opacity: 0; transform: translateY(30px); filter: hue-rotate(90deg); } 100% { opacity: 1; transform: translateY(0); filter: none; } }
+        .slide-title { font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 40px; letter-spacing: 4px; text-transform: uppercase; }
+        .slide-title span { background: linear-gradient(135deg, var(--cyan), var(--magenta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .slide-title::after { content: ''; display: block; width: 150px; height: 2px; background: linear-gradient(90deg, transparent, var(--cyan), var(--magenta), transparent); margin: 15px auto 0; }
+
+        /* Form Section & Table */
+        .form-section { padding: 35px; margin-bottom: 30px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 28px; }
+        .table-container { overflow: hidden; position: relative; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; background: rgba(0,240,255,0.08); color: var(--cyan); padding: 16px 14px; text-align: left; text-transform: uppercase; border-bottom: 1px solid rgba(0,240,255,0.2); white-space: nowrap; }
+        td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); white-space: nowrap; }
+        tbody tr { transition: all 0.3s ease; }
+        tbody tr:hover { background: linear-gradient(90deg, rgba(0,240,255,0.05), rgba(255,0,170,0.05)); }
+
+        /* Action Buttons */
+        .action-btn { width: 32px; height: 32px; border-radius: 6px; border: 1px solid; background: transparent; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; margin: 0 3px; font-size: 12px; }
+        .action-edit { border-color: #f0a500; color: #f0a500; }
+        .action-edit:hover { background: rgba(240,165,0,0.2); box-shadow: 0 0 15px rgba(240,165,0,0.4); }
+        .action-delete { border-color: var(--magenta); color: var(--magenta); }
+        .action-delete:hover { background: rgba(255,0,170,0.2); box-shadow: 0 0 15px rgba(255,0,170,0.4); }
+        .action-print { border-color: #00ff88; color: #00ff88; }
+        .action-print:hover { background: rgba(0,255,136,0.2); box-shadow: 0 0 15px rgba(0,255,136,0.4); }
+
+        /* Floating Button */
+        .print-btn { position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--magenta)); border: none; color: var(--bg); font-size: 20px; cursor: pointer; box-shadow: 0 0 30px rgba(0,240,255,0.3); transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .print-btn:hover { transform: scale(1.1) rotate(5deg); box-shadow: 0 0 50px rgba(0,240,255,0.5); }
+
+        /* Modals */
+        .modal-overlay, .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-overlay.active, .confirm-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content, .confirm-box { max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 40px; position: relative; animation: slideUp 0.4s ease; }
+        .modal-content { border-radius: 20px; }
+        .confirm-box { max-width: 400px; text-align: center; border-color: rgba(255,0,170,0.3); }
+        @keyframes slideUp { from { transform: translateY(50px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        .modal-content::before, .confirm-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--cyan), var(--magenta)); }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 24px; color: var(--fgm); cursor: pointer; transition: all 0.3s ease; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+        .modal-close:hover { color: var(--magenta); background: rgba(255,0,170,0.1); }
+        .modal-header { text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px dashed rgba(0,240,255,0.2); }
+        .modal-title, .confirm-title { font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 3px; background: linear-gradient(135deg, var(--cyan), var(--magenta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .modal-title { font-size: 1.5rem; }
+        .confirm-title { font-size: 1.3rem; color: var(--magenta); margin-bottom: 12px; }
+        .modal-subtitle { color: var(--fgm); font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; margin-top: 5px; }
+        .confirm-icon { font-size: 48px; margin-bottom: 20px; display: block; }
+        .confirm-message { color: var(--fgm); margin-bottom: 28px; font-size: 15px; }
+        .modal-actions, .confirm-actions { display: flex; gap: 15px; margin-top: 30px; justify-content: center; }
+
+        /* Struk */
+        .struk-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .struk-label { color: var(--fgm); font-weight: 500; }
+        .struk-value { font-weight: 600; }
+        .struk-total { background: linear-gradient(135deg, rgba(0,240,255,0.1), rgba(255,0,170,0.1)); border: 1px solid var(--cyan); padding: 18px; border-radius: 12px; margin-top: 25px; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--cyan); text-shadow: 0 0 15px rgba(0,240,255,0.5); }
+
+        /* Notification */
+        .notification { position: fixed; top: 90px; right: 20px; padding: 16px 24px; border-radius: 12px; font-weight: 600; font-size: 15px; letter-spacing: 1px; z-index: 3000; animation: notifSlide 0.4s ease, notifFade 0.4s ease 2.6s forwards; backdrop-filter: blur(15px); border: 1px solid; }
+        .notification.success { background: rgba(0,255,136,0.15); border-color: rgba(0,255,136,0.4); color: #00ff88; }
+        .notification.error { background: rgba(255,0,170,0.15); border-color: rgba(255,0,170,0.4); color: var(--magenta); }
+        @keyframes notifSlide { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes notifFade { to { opacity: 0; transform: translateX(50px); } }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hamburger { display: flex; } .nav-content { display: none; }
+            .slide { padding: 90px 15px 30px; } .slide-title { font-size: 1.5rem; }
+            .form-section { padding: 25px 20px; } .form-grid { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: column; } .btn { width: 100%; }
+            .print-btn { bottom: 20px; right: 20px; width: 50px; height: 50px; }
+            .login-card { padding: 35px 25px; } .login-title { font-size: 1.7rem; }
+        }
+        @media (max-width: 500px) { .slide-title { font-size: 1.2rem; } th, td { padding: 10px 8px; font-size: 12px; } .action-btn { width: 28px; height: 28px; font-size: 10px; } }
+
+        /* Print & Reduced Motion */
+        @media print { body { background: white !important; color: black !important; } .crt-overlay, .film-grain, #rain-canvas, .city-bg, .ground-reflection, .nav-container, .print-btn, .action-btn, .btn-group, .form-section { display: none !important; } th { background: #1a1a2e !important; color: white !important; -webkit-print-color-adjust: exact; } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+    </style>
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    <div class="film-grain"></div>
+    <canvas id="rain-canvas"></canvas>
+    <div class="city-bg"></div>
+    <div class="ground-reflection"></div>
+
+    <!-- Login -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-card glass">
+            <div class="login-header">
+                <h1 class="login-title">NIGHT CITY</h1>
+                <p class="login-subtitle">Parking Management System</p>
+            </div>
+            <form onsubmit="event.preventDefault(); login();">
+                <div class="form-group"><input type="text" id="username" class="cyber-input" placeholder="USERNAME" required autocomplete="off"></div>
+                <div class="form-group"><input type="password" id="password" class="cyber-input" placeholder="PASSWORD" required></div>
+                <button type="submit" class="btn-cyber btn-full">Initialize System</button>
+            </form>
+            <p style="margin-top: 25px; color: var(--fgm); font-size: 13px; text-align: center;">Access: <span class="neon-cyan">admin</span> / <span class="neon-magenta">admin123</span></p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="main-app" id="mainApp">
+        <div class="nav-container">
+            <div class="nav-content">
+                <button class="nav-btn active" onclick="showSlide('kendaraan')">Kendaraan</button>
+                <button class="nav-btn" onclick="showSlide('tarif')">Tarif</button>
+                <button class="nav-btn" onclick="showSlide('area')">Area</button>
+                <button class="nav-btn" onclick="showSlide('transaksi')">Transaksi</button>
+                <button class="nav-btn" onclick="showSlide('user')">User</button>
+                <button class="nav-btn" onclick="showSlide('log')">Log</button>
+                <button class="nav-btn logout-btn" onclick="logout()">Logout</button>
+            </div>
+            <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <button class="nav-btn" onclick="showSlide('kendaraan');toggleMenu()">Kendaraan</button>
+            <button class="nav-btn" onclick="showSlide('tarif');toggleMenu()">Tarif</button>
+            <button class="nav-btn" onclick="showSlide('area');toggleMenu()">Area</button>
+            <button class="nav-btn" onclick="showSlide('transaksi');toggleMenu()">Transaksi</button>
+            <button class="nav-btn" onclick="showSlide('user');toggleMenu()">User</button>
+            <button class="nav-btn" onclick="showSlide('log');toggleMenu()">Log</button>
+            <button class="nav-btn logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Kendaraan -->
+        <div id="kendaraan" class="slide active">
+            <h2 class="slide-title"><span>Data Kendaraan</span></h2>
+            <div class="form-section glass">
+                <div class="form-grid">
+                    <div class="form-group"><input type="text" id="k_id" class="cyber-input" placeholder="ID Kendaraan"></div>
+                    <div class="form-group"><input type="text" id="k_plat" class="cyber-input" placeholder="Plat Nomor"></div>
+                    <div class="form-group"><input type="text" id="k_jenis" class="cyber-input" placeholder="Jenis"></div>
+                    <div class="form-group"><input type="text" id="k_warna" class="cyber-input" placeholder="Warna"></div>
+                    <div class="form-group"><input type="text" id="k_pemilik" class="cyber-input" placeholder="Pemilik"></div>
+                    <div class="form-group"><input type="text" id="k_user" class="cyber-input" placeholder="ID User"></div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="save('kendaraan')">Simpan</button>
+                    <button class="btn btn-warning" onclick="edit('kendaraan')">Edit</button>
+                    <button class="btn btn-danger" onclick="del('kendaraan')">Hapus</button>
+                    <button class="btn btn-success" onclick="clearForm('kendaraan')">Clear</button>
+                </div>
+            </div>
+            <div class="table-container glass" id="printKendaraan"><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Plat</th><th>Jenis</th><th>Warna</th><th>Pemilik</th><th>User</th><th>Aksi</th></tr></thead><tbody id="tbodyKendaraan"></tbody></table></div></div>
+        </div>
+
+        <!-- Tarif -->
+        <div id="tarif" class="slide">
+            <h2 class="slide-title"><span>Data Tarif</span></h2>
+            <div class="form-section glass">
+                <div class="form-grid">
+                    <div class="form-group"><input type="text" id="t_id" class="cyber-input" placeholder="ID Tarif"></div>
+                    <div class="form-group"><input type="text" id="t_jenis" class="cyber-input" placeholder="Jenis Kendaraan"></div>
+                    <div class="form-group"><input type="number" id="t_tarif" class="cyber-input" placeholder="Tarif/Jam"></div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="save('tarif')">Simpan</button>
+                    <button class="btn btn-warning" onclick="edit('tarif')">Edit</button>
+                    <button class="btn btn-danger" onclick="del('tarif')">Hapus</button>
+                    <button class="btn btn-success" onclick="clearForm('tarif')">Clear</button>
+                </div>
+            </div>
+            <div class="table-container glass" id="printTarif"><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Jenis</th><th>Tarif/Jam</th><th>Aksi</th></tr></thead><tbody id="tbodyTarif"></tbody></table></div></div>
+        </div>
+
+        <!-- Area -->
+        <div id="area" class="slide">
+            <h2 class="slide-title"><span>Area Parkir</span></h2>
+            <div class="form-section glass">
+                <div class="form-grid">
+                    <div class="form-group"><input type="text" id="a_id" class="cyber-input" placeholder="ID Area"></div>
+                    <div class="form-group"><input type="text" id="a_nama" class="cyber-input" placeholder="Nama Area"></div>
+                    <div class="form-group"><input type="number" id="a_kap" class="cyber-input" placeholder="Kapasitas"></div>
+                    <div class="form-group"><input type="number" id="a_isi" class="cyber-input" placeholder="Terisi"></div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="save('area')">Simpan</button>
+                    <button class="btn btn-warning" onclick="edit('area')">Edit</button>
+                    <button class="btn btn-danger" onclick="del('area')">Hapus</button>
+                    <button class="btn btn-success" onclick="clearForm('area')">Clear</button>
+                </div>
+            </div>
+            <div class="table-container glass" id="printArea"><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nama</th><th>Kapasitas</th><th>Terisi</th><th>Aksi</th></tr></thead><tbody id="tbodyArea"></tbody></table></div></div>
+        </div>
+
+        <!-- Transaksi -->
+        <div id="transaksi" class="slide">
+            <h2 class="slide-title"><span>Transaksi Parkir</span></h2>
+            <div class="form-section glass">
+                <div class="form-grid">
+                    <div class="form-group"><input type="text" id="tr_kendaraan" class="cyber-input" placeholder="ID Kendaraan"></div>
+                    <div class="form-group"><input type="text" id="tr_tarif" class="cyber-input" placeholder="ID Tarif"></div>
+                    <div class="form-group"><input type="text" id="tr_user" class="cyber-input" placeholder="ID User"></div>
+                    <div class="form-group"><input type="text" id="tr_area" class="cyber-input" placeholder="ID Area"></div>
+                    <div class="form-group"><input type="number" id="tr_biaya" class="cyber-input" placeholder="Biaya Total"></div>
+                    <div class="form-group"><input type="text" id="tr_status" class="cyber-input" placeholder="Status"></div>
+                    <div class="form-group"><input type="datetime-local" id="tr_masuk" class="cyber-input"></div>
+                    <div class="form-group"><input type="datetime-local" id="tr_keluar" class="cyber-input"></div>
+                    <div class="form-group"><input type="number" id="tr_durasi" class="cyber-input" placeholder="Durasi (Jam)" step="0.1"></div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="save('transaksi')">Simpan</button>
+                    <button class="btn btn-warning" onclick="edit('transaksi')">Edit</button>
+                    <button class="btn btn-danger" onclick="del('transaksi')">Hapus</button>
+                    <button class="btn btn-success" onclick="clearForm('transaksi')">Clear</button>
+                </div>
+            </div>
+            <div class="table-container glass" id="printTransaksi"><div class="table-wrapper"><table><thead><tr><th>Kendaraan</th><th>Tarif</th><th>User</th><th>Area</th><th>Biaya</th><th>Status</th><th>Durasi</th><th>Masuk</th><th>Keluar</th><th>Aksi</th></tr></thead><tbody id="tbodyTransaksi"></tbody></table></div></div>
+        </div>
+
+        <!-- User -->
+        <div id="user" class="slide">
+            <h2 class="slide-title"><span>Manajemen User</span></h2>
+            <div class="form-section glass">
+                <div class="form-grid">
+                    <div class="form-group"><input type="text" id="u_id" class="cyber-input" placeholder="ID User"></div>
+                    <div class="form-group"><input type="text" id="u_nama" class="cyber-input" placeholder="Nama"></div>
+                    <div class="form-group"><input type="password" id="u_pass" class="cyber-input" placeholder="Password"></div>
+                    <div class="form-group"><select id="u_role" class="cyber-select"><option value="">-- Role --</option><option value="admin">Admin</option><option value="operator">Operator</option><option value="kasir">Kasir</option></select></div>
+                    <div class="form-group"><select id="u_status" class="cyber-select"><option value="">-- Status --</option><option value="aktif">Aktif</option><option value="nonaktif">Non-Aktif</option></select></div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="save('user')">Simpan</button>
+                    <button class="btn btn-warning" onclick="edit('user')">Edit</button>
+                    <button class="btn btn-danger" onclick="del('user')">Hapus</button>
+                    <button class="btn btn-success" onclick="clearForm('user')">Clear</button>
+                </div>
+            </div>
+            <div class="table-container glass" id="printUser"><div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nama</th><th>Password</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbodyUser"></tbody></table></div></div>
+        </div>
+
+        <!-- Log -->
+        <div id="log" class="slide">
+            <h2 class="slide-title"><span>Log Aktivitas</span></h2>
+            <div class="table-container glass" id="printLog"><div class="table-wrapper"><table><thead><tr><th>ID</th><th>User</th><th>Aktivitas</th><th>Waktu</th></tr></thead><tbody id="tbodyLog"></tbody></table></div></div>
+        </div>
+
+        <button class="print-btn" onclick="printAll()" title="Cetak Semua">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        </button>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="modalStruk">
+        <div class="modal-content glass">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-header"><h2 class="modal-title">STRUK PARKIR</h2><p class="modal-subtitle">Night City Parking</p></div>
+            <div id="strukContent"></div>
+            <div class="modal-actions"><button class="btn btn-cyber" onclick="printStruk()">Cetak</button><button class="btn btn-danger" onclick="closeModal()">Tutup</button></div>
+        </div>
+    </div>
+    <div class="confirm-overlay" id="confirmDel">
+        <div class="confirm-box glass">
+            <span class="confirm-icon">⚠</span>
+            <h3 class="confirm-title">KONFIRMASI</h3>
+            <p class="confirm-message" id="confirmMsg">Hapus data?</p>
+            <div class="confirm-actions"><button class="btn btn-danger" onclick="confirmDel()">Hapus</button><button class="btn btn-success" onclick="cancelDel()">Batal</button></div>
+        </div>
+    </div>
+
+    <script>
+        // Rain Animation
+        const canvas = document.getElementById('rain-canvas'), ctx = canvas.getContext('2d');
+        let drops = [];
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        function initRain() {
+            canvas.width = innerWidth; canvas.height = innerHeight;
+            drops = Array.from({length: Math.floor(innerWidth/15)}, () => ({x: Math.random()*canvas.width, y: Math.random()*canvas.height, l: Math.random()*25+10, s: Math.random()*8+6, o: Math.random()*0.3+0.1}));
+        }
+        function drawRain() {
+            if (reducedMotion) return;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            drops.forEach(d => {
+                ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x+1, d.y+d.l);
+                const g = ctx.createLinearGradient(d.x,d.y,d.x,d.y+d.l);
+                g.addColorStop(0,'rgba(0,240,255,0)'); g.addColorStop(1,`rgba(0,240,255,${d.o})`);
+                ctx.strokeStyle = g; ctx.lineWidth = 1; ctx.stroke();
+                d.y += d.s; if (d.y > canvas.height) { d.y = -d.l; d.x = Math.random()*canvas.width; }
+            });
+            requestAnimationFrame(drawRain);
+        }
+        initRain(); if (!reducedMotion) drawRain();
+        window.addEventListener('resize', initRain);
+
+        // Data Store
+        const store = {kendaraan:[],tarif:[],area:[],transaksi:[],user:[],log:[]};
+        let editIdx = {t:null, i:-1}, user = '', delPending = {t:null, i:-1};
+
+        // Auth
+        function login() {
+            if (document.getElementById('username').value === 'sabrina' && document.getElementById('password').value === 'bin1234') {
+                user = 'sabrina'; document.getElementById('loginContainer').style.display = 'none'; document.getElementById('mainApp').style.display = 'block';
+                loadAll(); addLog('Login berhasil'); notify('Login berhasil', 'success');
+            } else notify('Akses ditolak', 'error');
+        }
+        function logout() { addLog('Logout'); user = ''; document.getElementById('mainApp').style.display = 'none'; document.getElementById('loginContainer').style.display = 'flex'; notify('Logout berhasil', 'success'); toggleMenu(false); }
+
+        // UI Helpers
+        function notify(msg, type) { const n = document.createElement('div'); n.className = `notification ${type}`; n.textContent = msg; document.body.appendChild(n); setTimeout(() => n.remove(), 3000); }
+        function toggleMenu(s) { const m = document.getElementById('mobileMenu'), h = document.querySelector('.hamburger'); const open = s !== undefined ? s : !m.classList.contains('open'); m.classList.toggle('open', open); h.classList.toggle('active', open); }
+        function showSlide(id) { document.querySelectorAll('.slide').forEach(s => s.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(b => { if (b.getAttribute('onclick')?.includes(`'${id}'`)) b.classList.add('active'); }); }
+        function fmtDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleString('id-ID', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch { return d; } }
+
+        // Table Rendering
+        const fields = {
+            kendaraan: ['id','plat','jenis','warna','pemilik','user'],
+            tarif: ['id','jenis','tarif'],
+            area: ['id','nama','kap','isi'],
+            transaksi: ['kendaraan','tarif','user','area','biaya','status','durasi','masuk','keluar'],
+            user: ['id','nama','pass','role','status']
+        };
+        function loadAll() { Object.keys(store).forEach(loadTable); }
+        function loadTable(t) {
+            const tb = document.getElementById(`tbody${t.charAt(0).toUpperCase()+t.slice(1)}`); if (!tb) return;
+            tb.innerHTML = '';
+            store[t].forEach((r, i) => {
+                const tr = tb.insertRow();
+                if (t === 'kendaraan') tr.innerHTML = `<td>${r.id||'-'}</td><td>${r.plat||'-'}</td><td>${r.jenis||'-'}</td><td>${r.warna||'-'}</td><td>${r.pemilik||'-'}</td><td>${r.user||'-'}</td><td><button class="action-btn action-edit" onclick="editRow('kendaraan',${i})">✎</button><button class="action-btn action-delete" onclick="delRow('kendaraan',${i})">✕</button></td>`;
+                else if (t === 'tarif') tr.innerHTML = `<td>${r.id||'-'}</td><td>${r.jenis||'-'}</td><td>Rp ${(+r.tarif||0).toLocaleString('id-ID')}</td><td><button class="action-btn action-edit" onclick="editRow('tarif',${i})">✎</button><button class="action-btn action-delete" onclick="delRow('tarif',${i})">✕</button></td>`;
+                else if (t === 'area') tr.innerHTML = `<td>${r.id||'-'}</td><td>${r.nama||'-'}</td><td>${r.kap||0}</td><td>${r.isi||0}</td><td><button class="action-btn action-edit" onclick="editRow('area',${i})">✎</button><button class="action-btn action-delete" onclick="delRow('area',${i})">✕</button></td>`;
+                else if (t === 'transaksi') tr.innerHTML = `<td>${r.kendaraan||'-'}</td><td>${r.tarif||'-'}</td><td>${r.user||'-'}</td><td>${r.area||'-'}</td><td>Rp ${(+r.biaya||0).toLocaleString('id-ID')}</td><td>${r.status||'-'}</td><td>${r.durasi||0}j</td><td>${fmtDate(r.masuk)}</td><td>${fmtDate(r.keluar)}</td><td><button class="action-btn action-print" onclick="struk(${i})">🖧</button><button class="action-btn action-edit" onclick="editRow('transaksi',${i})">✎</button><button class="action-btn action-delete" onclick="delRow('transaksi',${i})">✕</button></td>`;
+                else if (t === 'user') tr.innerHTML = `<td>${r.id||'-'}</td><td>${r.nama||'-'}</td><td>${'•'.repeat(r.pass?.length||0)}</td><td>${r.role||'-'}</td><td>${r.status||'-'}</td><td><button class="action-btn action-edit" onclick="editRow('user',${i})">✎</button><button class="action-btn action-delete" onclick="delRow('user',${i})">✕</button></td>`;
+                else if (t === 'log') tr.innerHTML = `<td>${r.id||'-'}</td><td>${r.user||'-'}</td><td>${r.akt||'-'}</td><td>${r.time||'-'}</td>`;
+            });
+        }
+
+        // CRUD
+        const getters = {
+            kendaraan: () => ({id: val('k_id'), plat: val('k_plat'), jenis: val('k_jenis'), warna: val('k_warna'), pemilik: val('k_pemilik'), user: val('k_user')}),
+            tarif: () => ({id: val('t_id'), jenis: val('t_jenis'), tarif: val('t_tarif')}),
+            area: () => ({id: val('a_id'), nama: val('a_nama'), kap: val('a_kap'), isi: val('a_isi')}),
+            transaksi: () => ({kendaraan: val('tr_kendaraan'), tarif: val('tr_tarif'), user: val('tr_user'), area: val('tr_area'), biaya: val('tr_biaya'), status: val('tr_status'), durasi: val('tr_durasi'), masuk: val('tr_masuk'), keluar: val('tr_keluar')}),
+            user: () => ({id: val('u_id'), nama: val('u_nama'), pass: val('u_pass'), role: val('u_role'), status: val('u_status')})
+        };
+        const setters = {
+            kendaraan: d => { setVal('k_id', d.id); setVal('k_plat', d.plat); setVal('k_jenis', d.jenis); setVal('k_warna', d.warna); setVal('k_pemilik', d.pemilik); setVal('k_user', d.user); },
+            tarif: d => { setVal('t_id', d.id); setVal('t_jenis', d.jenis); setVal('t_tarif', d.tarif); },
+            area: d => { setVal('a_id', d.id); setVal('a_nama', d.nama); setVal('a_kap', d.kap); setVal('a_isi', d.isi); },
+            transaksi: d => { setVal('tr_kendaraan', d.kendaraan); setVal('tr_tarif', d.tarif); setVal('tr_user', d.user); setVal('tr_area', d.area); setVal('tr_biaya', d.biaya); setVal('tr_status', d.status); setVal('tr_durasi', d.durasi); setVal('tr_masuk', d.masuk); setVal('tr_keluar', d.keluar); },
+            user: d => { setVal('u_id', d.id); setVal('u_nama', d.nama); setVal('u_pass', d.pass); setVal('u_role', d.role); setVal('u_status', d.status); }
+        };
+        const required = {kendaraan: ['id','plat'], tarif: ['id','jenis'], area: ['id','nama'], transaksi: ['kendaraan','tarif'], user: ['id','nama','pass','role']};
+        const idFields = {kendaraan: 'k_id', tarif: 't_id', area: 'a_id', transaksi: 'tr_kendaraan', user: 'u_id'};
+
+        function val(id) { return document.getElementById(id)?.value || ''; }
+        function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v || ''; }
+
+        function save(t) {
+            const d = getters[t]();
+            if (!required[t]?.every(f => d[f]?.trim())) return notify('Field wajib harus diisi!', 'error');
+            if (editIdx.t === t && editIdx.i >= 0) { store[t][editIdx.i] = d; editIdx = {t:null, i:-1}; addLog(`Update ${t}`); notify('Data diupdate', 'success'); }
+            else { store[t].push(d); addLog(`Simpan ${t}`); notify('Data disimpan', 'success'); }
+            loadTable(t); clearForm(t);
+        }
+        function editRow(t, i) { setters[t](store[t][i]); editIdx = {t, i}; notify('Mode edit', 'success'); }
+        function edit(t) { const id = val(idFields[t]); const i = store[t].findIndex(r => r.id === id); if (i >= 0) editRow(t, i); else notify('Data tidak ditemukan', 'error'); }
+        function delRow(t, i) { delPending = {t, i}; document.getElementById('confirmMsg').textContent = `Hapus data ${t} #${i+1}?`; document.getElementById('confirmDel').classList.add('active'); }
+        function del(t) { const id = val(idFields[t]); const i = store[t].findIndex(r => r.id === id); if (i >= 0) delRow(t, i); else notify('Data tidak ditemukan', 'error'); }
+        function confirmDel() { if (delPending.t && delPending.i >= 0) { store[delPending.t].splice(delPending.i, 1); loadTable(delPending.t); addLog(`Hapus ${delPending.t}`); notify('Data dihapus', 'success'); } cancelDel(); }
+        function cancelDel() { delPending = {t:null, i:-1}; document.getElementById('confirmDel').classList.remove('active'); }
+        function clearForm(t) { const s = document.getElementById(t); if (s) s.querySelectorAll('input,select').forEach(el => el.value = ''); editIdx = {t:null, i:-1}; }
+
+        // Log
+        function addLog(a) { store.log.unshift({id: 'LOG'+String(store.log.length+1).padStart(4,'0'), user: user, akt: a, time: new Date().toLocaleString('id-ID')}); if (store.log.length > 100) store.log.pop(); loadTable('log'); }
+
+        // Print
+        function printAll() {
+            const w = window.open('', '_blank');
+            let c = `<!DOCTYPE html><html><head><title>Laporan</title><style>body{font-family:Arial,sans-serif;padding:20px;background:white;color:black}h1,h2{text-align:center}h2{margin-top:30px;border-bottom:2px solid #333;padding-bottom:10px}table{width:100%;border-collapse:collapse}th{background:#1a1a2e;color:white;padding:10px;text-align:left}td{padding:8px;border-bottom:1px solid #ddd}</style></head><body><h1>LAPORAN PARKIR NIGHT CITY</h1><p style="text-align:center">${new Date().toLocaleString('id-ID')}</p>`;
+            ['kendaraan','tarif','area','transaksi','user','log'].forEach(t => { const el = document.getElementById(`print${t.charAt(0).toUpperCase()+t.slice(1)}`); if (el) c += `<h2>${t.charAt(0).toUpperCase()+t.slice(1)}</h2>${el.outerHTML}`; });
+            w.document.write(c + '</body></html>'); w.document.close(); w.print();
+        }
+        function struk(i) {
+            const d = store.transaksi[i]; if (!d) return notify('Data tidak ditemukan', 'error');
+            const k = store.kendaraan.find(x => x.id === d.kendaraan), t = store.tarif.find(x => x.id === d.tarif), a = store.area.find(x => x.id === d.area);
+            document.getElementById('strukContent').innerHTML = `
+                <div class="struk-row"><span class="struk-label">No. Transaksi</span><span class="struk-value">${d.kendaraan}-${Date.now()}</span></div>
+                <div class="struk-row"><span class="struk-label">Tanggal</span><span class="struk-value">${new Date().toLocaleString('id-ID')}</span></div>
+                <div class="struk-row"><span class="struk-label">Plat Nomor</span><span class="struk-value">${k?.plat||d.kendaraan}</span></div>
+                <div class="struk-row"><span class="struk-label">Jenis</span><span class="struk-value">${k?.jenis||t?.jenis||'-'}</span></div>
+                <div class="struk-row"><span class="struk-label">Area</span><span class="struk-value">${a?.nama||d.area}</span></div>
+                <div class="struk-row"><span class="struk-label">Masuk</span><span class="struk-value">${fmtDate(d.masuk)}</span></div>
+                <div class="struk-row"><span class="struk-label">Keluar</span><span class="struk-value">${fmtDate(d.keluar)}</span></div>
+                <div class="struk-row"><span class="struk-label">Durasi</span><span class="struk-value">${d.durasi||0} Jam</span></div>
+                <div class="struk-row"><span class="struk-label">Tarif/Jam</span><span class="struk-value">Rp ${(+t?.tarif||0).toLocaleString('id-ID')}</span></div>
+                <div class="struk-total">TOTAL: Rp ${(+d.biaya||0).toLocaleString('id-ID')}</div>`;
+            document.getElementById('modalStruk').classList.add('active');
+        }
+        function printStruk() {
+            const w = window.open('', '_blank');
+            w.document.write(`<!DOCTYPE html><html><head><title>Struk</title><style>body{font-family:'Courier New',monospace;padding:20px;max-width:300px;margin:0 auto;background:white;color:black}.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #ccc}.total{background:#1a1a2e;color:white;padding:15px;text-align:center;font-size:16px;font-weight:bold;margin-top:15px}</style></head><body><h2 style="text-align:center">STRUK PARKIR</h2>${document.getElementById('strukContent').innerHTML}</body></html>`);
+            w.document.close(); w.print();
+        }
+        function closeModal() { document.getElementById('modalStruk').classList.remove('active'); }
+
+        // Keyboard
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); cancelDel(); toggleMenu(false); } if (e.key === 'Enter' && document.getElementById('loginContainer').style.display !== 'none') login(); });
+    </script>
+</body>
+</html>
+MAKE ME A WEBSITE ABOUT HOSPITAL APPLICATION THAT CONTAINS ROOM: ROOM ID, ROOM NUMBER. PATIENT: PATIENT NAME, PATIENT NIK, PATIENT NUMBER, DOCTOR. DOCTOR NAME, DOCTOR TELEPHONE NUMBER. NURSE NAME AND NURSE ID, PARKING ID, DRUGS AND DRUGS NAME AND DRUG TYPE, MAKE A LOGIN FORM AT THE BEGINNING. AND A GOOD DESIGN.
